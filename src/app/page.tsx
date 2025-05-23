@@ -27,7 +27,7 @@ export default async function HomePage() {
         ) : (
           <div className="flex gap-4 justify-center">
             <Link
-              href="/home"
+              href="/login"
               className="px-6 py-3 rounded bg-yellow-500 text-gray-900 font-bold hover:bg-yellow-400 transition"
             >
               Entrar
