@@ -1,37 +1,46 @@
+import { getOptionalSession } from "@/lib/get-optional-session"
 import Link from "next/link"
-import { LoginForm } from "./_components/login-form"
-import Image from 'next/image'
-import logoImg from '../../public/images/logo3.png'
 
-export default function Home() {
+export default async function HomePage() {
+  const session = await getOptionalSession()
+
   return (
-    <div className="flex min-h-screen flex-col items-center justify-center p-4">
-      <div className="w-full max-w-md space-y-8">
-        <div className="text-center space-y-2">
-          <Image
-            src={logoImg}
-            alt="Logo"
-            width={300}
-            height={300}
-            className="mx-auto mb-8.5"
-          />
-          <h1 className="mt-10 text-4xl font-bold">Login</h1>
-          <p className="mt-3 text-sm text-muted-foreground">
-            Entre com suas credenciais para acessar sua conta
-          </p>
-        </div>
+    <main className="relative min-h-screen flex flex-col items-center justify-center text-white overflow-hidden bg-gray-900">
+      {/* fundo animado */}
+      <div className="absolute inset-0 animate-background bg-gradient-to-br from-yellow-500/10 via-purple-500/10 to-blue-500/10 blur-2xl opacity-60"></div>
 
-        <LoginForm />
+      <div className="relative z-10 text-center p-6">
+        <h1 className="text-4xl font-bold text-[#fba931] mb-4">Bem-vindo ao Venda Mais</h1>
 
-        <div className="text-center text-sm">
-          <p>
-            Não tem uma conta?{" "}
-            <Link href="/signup" className="text-[#fba931] font-bold hover:underline">
-              Cadastre-se
+        <p className="text-lg text-gray-300 mb-8 max-w-xl mx-auto">
+          Sua plataforma de vendas automatizadas via WhatsApp.<br />
+          Organize seus catálogos, atenda com agilidade e venda todos os dias.
+        </p>
+
+        {session ? (
+          <Link
+            href="/dashboard"
+            className="px-6 py-3 rounded bg-yellow-500 text-gray-900 font-bold hover:bg-yellow-400 transition"
+          >
+            Ir para o painel
+          </Link>
+        ) : (
+          <div className="flex gap-4 justify-center">
+            <Link
+              href="/home"
+              className="px-6 py-3 rounded bg-yellow-500 text-gray-900 font-bold hover:bg-yellow-400 transition"
+            >
+              Entrar
             </Link>
-          </p>
-        </div>
+            <Link
+              href="/signup"
+              className="px-6 py-3 rounded border border-yellow-500 text-yellow-500 hover:bg-yellow-500 hover:text-gray-900 transition"
+            >
+              Criar conta
+            </Link>
+          </div>
+        )}
       </div>
-    </div>
+    </main>
   )
 }

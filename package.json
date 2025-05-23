@@ -20,6 +20,7 @@
     "@radix-ui/react-slot": "^1.2.2",
     "better-auth": "^1.2.7",
     "class-variance-authority": "^0.7.1",
+    "cloudinary": "^2.6.1",
     "clsx": "^2.1.1",
     "lucide-react": "^0.508.0",
     "next": "15.3.2",
@@ -45,7 +46,10 @@
   "nixpacks": {
     "phases": {
       "setup": {
-        "nixPkgs": ["nodejs_20", "yarn"]
+        "nixPkgs": [
+          "nodejs_20",
+          "yarn"
+        ]
       }
     }
   }

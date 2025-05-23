@@ -38,7 +38,7 @@ export function LoginForm() {
       {
         email: formData.email,
         password: formData.password,
-        callbackURL: "/Dashboard",
+        callbackURL: "/dashboard",
       },
       {
         onRequest: (ctx) => { },
