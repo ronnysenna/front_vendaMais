@@ -13,9 +13,9 @@ export default function LoginPage() {
             alt="Logo"
             width={200}
             height={200}
-            className="mx-auto mb-8.5"
+            className="mx-auto mb-7.5"
           />
-          <h1 className="mt-10 text-4xl font-bold mb-4">Login</h1>
+          <h1 className="mt-8 text-4xl font-bold mb-4">Login</h1>
           <p className="mt-3 text-sm text-muted-foreground">
             Entre com suas credenciais para acessar sua conta
           </p>

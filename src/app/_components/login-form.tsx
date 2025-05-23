@@ -66,7 +66,7 @@ export function LoginForm() {
   }
 
   return (
-    <div className="bg-gray-800 p-6 rounded-lg shadow-md text-white space-y-6 w-full">
+    <div className="bg-gray-800 p-6 rounded-lg shadow-md text-white space-y-2 w-full">
       <h1 className="text-2xl font-bold text-center text-[#fba931]">Acessar Conta</h1>
 
       <Form {...form}>

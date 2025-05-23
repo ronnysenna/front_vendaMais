@@ -13,10 +13,10 @@ export default function Signup() {
             alt="Logo Venda Mais"
             width={200}
             height={200}
-            className="mx-auto mb-8"
+            className="mx-auto mb-6"
           />
 
-          <h1 className="mt-10 text-4xl font-bold mb-4">Cadastro</h1>
+          <h1 className="mt-8 text-4xl font-bold mb-3">Cadastro</h1>
           <p className="text-sm text-gray-400 mt-1">Crie sua conta para começar a vender mais!</p>
         </div>
 
