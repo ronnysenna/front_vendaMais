@@ -1,9 +1,11 @@
+// app/components/Sidebar.tsx (ou onde quer que seu Sidebar esteja)
 'use client'
 
 import Image from "next/image"
 import Link from "next/link"
 import { useState } from "react"
-import { HomeIcon, UserIcon } from "lucide-react"
+// Importe os ícones necessários. ChevronDown/Up para o toggle do submenu.
+import { HomeIcon, UserIcon, QrCodeIcon, PackageIcon, PlusCircleIcon, ChevronDown, ChevronUp, EditIcon, SearchIcon } from "lucide-react"
 import { ButtonSignOut } from "../../components/ui/button-signout"
 
 export default function Sidebar({ userName }: { userName: string }) {
@@ -42,6 +44,9 @@ export default function Sidebar({ userName }: { userName: string }) {
 }
 
 function SidebarContent({ userName }: { userName: string }) {
+  // Novo estado para controlar a abertura/fechamento do sub-menu de Produtos
+  const [openProductsMenu, setOpenProductsMenu] = useState(false);
+
   return (
     <>
       {/* Cabeçalho com nome */}
@@ -63,8 +68,42 @@ function SidebarContent({ userName }: { userName: string }) {
             </Link>
           </li>
           <li>
-
+            <Link href="/qrcode" className="flex items-center gap-2 hover:text-yellow-400 font-medium">
+              <QrCodeIcon size={18} /> Gerar QR Code
+            </Link>
           </li>
+
+          {/* INÍCIO: Sub-menu "Produtos" */}
+          <li>
+            {/* O item principal do menu "Produtos" */}
+            <button
+              onClick={() => setOpenProductsMenu(!openProductsMenu)}
+              className="flex items-center justify-between w-full gap-2 hover:text-yellow-400 font-medium text-left"
+            >
+              <span className="flex items-center gap-2">
+                <PackageIcon size={18} /> Produtos
+              </span>
+              {openProductsMenu ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
+            </button>
+
+            {/* Conteúdo do Sub-menu (mostrado condicionalmente) */}
+            {openProductsMenu && (
+              <ul className="ml-6 mt-2 space-y-3"> {/* Margem à esquerda para indentação */}
+                <li>
+                  <Link href="/product/catalog" className="flex items-center gap-2 hover:text-yellow-400 text-sm">
+                    <SearchIcon size={16} /> Pesquisar Produtos
+                  </Link>
+                </li>
+                <li>
+                  <Link href="/product/addProduct" className="flex items-center gap-2 hover:text-yellow-400 text-sm">
+                    <PlusCircleIcon size={16} /> Adicionar Produto
+                  </Link>
+                </li>
+              </ul>
+            )}
+          </li>
+          {/* FIM: Sub-menu "Produtos" */}
+
         </ul>
       </nav>
       {/* Botão sair fixo no rodapé */}
