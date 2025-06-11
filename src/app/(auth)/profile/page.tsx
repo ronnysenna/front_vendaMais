@@ -24,6 +24,7 @@ export default function ProfilePage() {
   const [previewUrl, setPreviewUrl] = useState<string | null>(null)
   const [errorMessage, setErrorMessage] = useState("")
   const [successMessage, setSuccessMessage] = useState("")
+  const [showFeedback, setShowFeedback] = useState(false)
 
   const form = useForm<ProfileFormData>({
     resolver: zodResolver(schema),
@@ -34,6 +35,18 @@ export default function ProfilePage() {
       address: "",
     },
   })
+
+  useEffect(() => {
+    if (successMessage || errorMessage) {
+      setShowFeedback(true)
+      const timer = setTimeout(() => {
+        setShowFeedback(false)
+        setSuccessMessage("")
+        setErrorMessage("")
+      }, 3000)
+      return () => clearTimeout(timer)
+    }
+  }, [successMessage, errorMessage])
 
   // Carregar dados do perfil
   useEffect(() => {
@@ -105,66 +118,71 @@ export default function ProfilePage() {
     <div className="container-fluid py-4">
       <div className="row justify-content-center">
         <div className="col-12 col-md-8 col-lg-6">
-          {successMessage && (
-            <div className="alert alert-success d-flex align-items-center gap-2" role="alert">
-              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" className="bi bi-check-circle-fill" viewBox="0 0 16 16">
-                <path d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0zm-3.97-3.03a.75.75 0 0 0-1.08.022L7.477 9.417 5.384 7.323a.75.75 0 0 0-1.06 1.06L6.97 11.03a.75.75 0 0 0 1.079-.02l3.992-4.99a.75.75 0 0 0-.01-1.05z" />
-              </svg>
-              {successMessage}
+          {showFeedback && (errorMessage || successMessage) && (
+            <div className={`profile-feedback ${errorMessage ? 'error' : 'success'} d-flex align-items-center gap-2`}>
+              {errorMessage ? (
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" className="bi bi-exclamation-circle-fill" viewBox="0 0 16 16">
+                  <path d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0zM8 4a.905.905 0 0 0-.9.995l.35 3.507a.552.552 0 0 0 1.1 0l.35-3.507A.905.905 0 0 0 8 4zm.002 6a1 1 0 1 0 0 2 1 1 0 0 0 0-2z" />
+                </svg>
+              ) : (
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" className="bi bi-check-circle-fill" viewBox="0 0 16 16">
+                  <path d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0zm-3.97-3.03a.75.75 0 0 0-1.08.022L7.477 9.417 5.384 7.323a.75.75 0 0 0-1.06 1.06L6.97 11.03a.75.75 0 0 0 1.079-.02l3.992-4.99a.75.75 0 0 0-.01-1.05z" />
+                </svg>
+              )}
+              {errorMessage || successMessage}
             </div>
           )}
 
-          {errorMessage && (
-            <div className="alert alert-danger d-flex align-items-center gap-2" role="alert">
-              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" className="bi bi-exclamation-circle-fill" viewBox="0 0 16 16">
-                <path d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0zM8 4a.905.905 0 0 0-.9.995l.35 3.507a.552.552 0 0 0 1.1 0l.35-3.507A.905.905 0 0 0 8 4zm.002 6a1 1 0 1 0 0 2 1 1 0 0 0 0-2z" />
-              </svg>
-              {errorMessage}
-            </div>
-          )}
-
-          <div className="card">
+          <div className="profile-card">
             <div className="card-body p-4">
               <div className="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 mb-4">
-                <h1 className="h3 mb-0 fw-bold">Perfil</h1>
+                <div>
+                  <h1 className="h3 mb-1 fw-bold gradient-number">Perfil da Empresa</h1>
+                  <p className="text-muted mb-0">Gerencie as informações da sua empresa</p>
+                </div>
                 <button
                   type="button"
-                  className="btn btn-outline-primary d-flex align-items-center justify-content-center gap-2 w-100 w-md-auto"
+                  className={`btn d-flex align-items-center justify-content-center gap-2 w-100 w-md-auto hover-scale ${isEditing ? 'btn-secondary' : 'btn-primary'
+                    }`}
                   onClick={() => setIsEditing(!isEditing)}
                 >
-                  <Camera size={18} />
-                  <span>{isEditing ? "Cancelar" : "Editar"}</span>
+                  {isEditing ? (
+                    <>
+                      <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="currentColor" className="bi bi-x-lg" viewBox="0 0 16 16">
+                        <path d="M2.146 2.854a.5.5 0 1 1 .708-.708L8 7.293l5.146-5.147a.5.5 0 0 1 .708.708L8.707 8l5.147 5.146a.5.5 0 0 1-.708.708L8 8.707l-5.146 5.147a.5.5 0 0 1-.708-.708L7.293 8 2.146 2.854Z" />
+                      </svg>
+                      <span>Cancelar</span>
+                    </>
+                  ) : (
+                    <>
+                      <Camera size={18} />
+                      <span>Editar Empresa</span>
+                    </>
+                  )}
                 </button>
               </div>
 
               <div className="text-center mb-4">
-                <div className="position-relative d-inline-block">
-                  <div className="rounded-circle overflow-hidden bg-light shadow-sm" style={{ width: '120px', height: '120px' }}>
-                    {previewUrl ? (
-                      <Image
-                        src={previewUrl}
-                        alt="Foto do perfil"
-                        width={120}
-                        height={120}
-                        className="img-fluid hover-scale"
-                        style={{ objectFit: 'cover' }}
-                      />
-                    ) : (
-                      <div className="d-flex align-items-center justify-content-center h-100">
-                        <Camera size={40} className="text-muted" />
-                      </div>
-                    )}
-                  </div>
+                <div className="profile-avatar-wrapper">
+                  {previewUrl ? (
+                    <Image
+                      src={previewUrl}
+                      alt="Logo da empresa"
+                      width={120}
+                      height={120}
+                      className="w-full h-full object-cover"
+                    />
+                  ) : (
+                    <div className="w-full h-full bg-secondary text-white d-flex align-items-center justify-content-center">
+                      <Camera size={48} />
+                    </div>
+                  )}
                   {isEditing && (
-                    <label
-                      htmlFor="image-upload"
-                      className="position-absolute bottom-0 end-0 bg-primary text-white rounded-circle p-2 shadow-sm hover-scale"
-                      style={{ cursor: 'pointer', transition: 'transform 0.2s ease' }}
-                    >
-                      <Camera size={18} />
+                    <label htmlFor="imageInput" className="profile-avatar-overlay d-flex align-items-center justify-content-center">
+                      <Camera size={24} className="text-white" />
                       <input
-                        id="image-upload"
                         type="file"
+                        id="imageInput"
                         accept="image/*"
                         className="d-none"
                         onChange={handleImageChange}
@@ -172,6 +190,7 @@ export default function ProfilePage() {
                     </label>
                   )}
                 </div>
+                <small className="text-muted mt-2 d-block">Logo da empresa</small>
               </div>
 
               <Form {...form}>
@@ -182,17 +201,18 @@ export default function ProfilePage() {
                         control={form.control}
                         name="name"
                         render={({ field }) => (
-                          <FormItem>
+                          <FormItem className="profile-form-group">
+                            <label className="form-label">Razão Social</label>
                             <FormControl>
                               <input
                                 type="text"
-                                className="form-control transition-all"
-                                placeholder="Nome completo"
+                                className="profile-form-control form-control"
+                                placeholder="Nome da empresa"
                                 disabled={!isEditing}
                                 {...field}
                               />
                             </FormControl>
-                            <FormMessage className="text-danger small" />
+                            <FormMessage className="text-danger small mt-1" />
                           </FormItem>
                         )}
                       />
@@ -203,17 +223,18 @@ export default function ProfilePage() {
                         control={form.control}
                         name="phone"
                         render={({ field }) => (
-                          <FormItem>
+                          <FormItem className="profile-form-group">
+                            <label className="form-label">Telefone Comercial</label>
                             <FormControl>
                               <input
                                 type="tel"
-                                className="form-control transition-all"
-                                placeholder="Telefone"
+                                className="profile-form-control form-control"
+                                placeholder="(00) 0000-0000"
                                 disabled={!isEditing}
                                 {...field}
                               />
                             </FormControl>
-                            <FormMessage className="text-danger small" />
+                            <FormMessage className="text-danger small mt-1" />
                           </FormItem>
                         )}
                       />
@@ -224,17 +245,18 @@ export default function ProfilePage() {
                         control={form.control}
                         name="cpfCnpj"
                         render={({ field }) => (
-                          <FormItem>
+                          <FormItem className="profile-form-group">
+                            <label className="form-label">CNPJ</label>
                             <FormControl>
                               <input
                                 type="text"
-                                className="form-control transition-all"
-                                placeholder="CPF/CNPJ"
+                                className="profile-form-control form-control"
+                                placeholder="00.000.000/0000-00"
                                 disabled={!isEditing}
                                 {...field}
                               />
                             </FormControl>
-                            <FormMessage className="text-danger small" />
+                            <FormMessage className="text-danger small mt-1" />
                           </FormItem>
                         )}
                       />
@@ -245,33 +267,36 @@ export default function ProfilePage() {
                         control={form.control}
                         name="address"
                         render={({ field }) => (
-                          <FormItem>
+                          <FormItem className="profile-form-group">
+                            <label className="form-label">Endereço Comercial</label>
                             <FormControl>
                               <input
                                 type="text"
-                                className="form-control transition-all"
-                                placeholder="Endereço completo"
+                                className="profile-form-control form-control"
+                                placeholder="Rua, número, bairro, cidade - UF"
                                 disabled={!isEditing}
                                 {...field}
                               />
                             </FormControl>
-                            <FormMessage className="text-danger small" />
+                            <FormMessage className="text-danger small mt-1" />
                           </FormItem>
                         )}
                       />
                     </div>
                   </div>
 
-                  <div className={`mt-4 ${isEditing ? 'animate-slide-in' : ''}`}>
-                    {isEditing ? (
+                  {isEditing && (
+                    <div className="mt-4 animate-slide-in">
                       <button
                         type="submit"
-                        className="btn btn-primary w-100 d-flex align-items-center justify-content-center gap-2 py-2 hover-scale-sm"
+                        className="btn btn-primary w-100 d-flex align-items-center justify-content-center gap-2 py-2 hover-scale"
                         disabled={isLoading}
                       >
                         {isLoading ? (
                           <>
-                            <span className="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                            <div className="spinner-border spinner-border-sm" role="status">
+                              <span className="visually-hidden">Carregando...</span>
+                            </div>
                             <span>Salvando alterações...</span>
                           </>
                         ) : (
@@ -283,10 +308,18 @@ export default function ProfilePage() {
                           </>
                         )}
                       </button>
-                    ) : null}
-                  </div>
+                    </div>
+                  )}
                 </form>
               </Form>
+
+              {isLoading && (
+                <div className="loading-overlay">
+                  <div className="spinner-border text-primary" role="status">
+                    <span className="visually-hidden">Carregando...</span>
+                  </div>
+                </div>
+              )}
             </div>
           </div>
         </div>

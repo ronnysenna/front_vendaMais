@@ -267,170 +267,264 @@ export default function QRCodePage() {
     }
   }, [instanceName, N8N_BASE_URL, startTimer])
 
-  useEffect(() => {
-    const loaded = loadStatusFromLocalStorage()
-    if (!loaded && instanceName) {
-      void checkIfConnected(instanceName)
+  const handleCreateInstance = async () => {
+    if (!instanceName.trim()) return
+
+    setLoading(true)
+    setError(null)
+    setQrCodeSrc(null)
+
+    try {
+      const response = await fetch(`${N8N_BASE_URL}/criar-instancia`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ instanceName }),
+      })
+
+      if (!response.ok) {
+        throw new Error('Erro ao criar instância')
+      }
+
+      const data: QRCodeResponse = await response.json()
+
+      if (data.error) {
+        throw new Error(data.error)
+      }
+
+      if (data.qrCodeBase64) {
+        setQrCodeSrc(`data:image/png;base64,${data.qrCodeBase64}`)
+        startConnectionCheck()
+      }
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Erro ao criar instância')
+    } finally {
+      setLoading(false)
     }
+  }
+
+  const handleDisconnect = async () => {
+    if (!instanceName) return
+
+    try {
+      setLoading(true)
+      setError(null)
+
+      const response = await fetch(`${N8N_BASE_URL}/deletar-instancia`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ instanceName }),
+      })
+
+      if (!response.ok) {
+        throw new Error('Erro ao desconectar instância')
+      }
+
+      setIsConnected(false)
+      setQrCodeSrc(null)
+      setInstanceName('')
+      saveStatusToLocalStorage(instanceName, false)
+      stopConnectionCheck()
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Erro ao desconectar instância')
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const startConnectionCheck = useCallback(() => {
+    if (timerIntervalRef.current) {
+      clearInterval(timerIntervalRef.current)
+    }
+
+    let timeLeft = 30
+    setTimer(timeLeft)
+
+    timerIntervalRef.current = setInterval(async () => {
+      if (timeLeft <= 0) {
+        if (timerIntervalRef.current) {
+          clearInterval(timerIntervalRef.current)
+        }
+        const isConnected = await checkIfConnected(instanceName)
+        if (!isConnected) {
+          setQrCodeSrc(null)
+          handleCreateInstance()
+        }
+        return
+      }
+      setTimer(--timeLeft)
+    }, 1000)
+  }, [checkIfConnected, handleCreateInstance, instanceName])
+
+  const stopConnectionCheck = useCallback(() => {
+    if (timerIntervalRef.current) {
+      clearInterval(timerIntervalRef.current)
+      timerIntervalRef.current = null
+    }
+    setTimer(null)
+  }, [])
+
+  useEffect(() => {
+    loadStatusFromLocalStorage()
     return () => {
       if (timerIntervalRef.current) {
         clearInterval(timerIntervalRef.current)
       }
     }
-  }, [loadStatusFromLocalStorage, instanceName, checkIfConnected])
+  }, [loadStatusFromLocalStorage])
+
+  useEffect(() => {
+    if (isConnected) {
+      stopConnectionCheck()
+    }
+  }, [isConnected, stopConnectionCheck])
 
   return (
     <div className="container-fluid py-4">
       <div className="row justify-content-center">
         <div className="col-12 col-md-8 col-lg-6">
-          <div className="card border-0 shadow-sm">
+          {error && (
+            <div className="profile-feedback error d-flex align-items-center gap-2">
+              <AlertCircle size={20} />
+              {error}
+            </div>
+          )}
+
+          <div className="profile-card">
             <div className="card-body p-4">
-              <div className="d-flex justify-content-between align-items-center mb-4">
-                <h1 className="h3 mb-0">Configuração do WhatsApp</h1>
-                {history.length > 0 && (
-                  <button
-                    onClick={() => setShowHistory(!showHistory)}
-                    className="btn btn-outline-primary d-flex align-items-center gap-2"
-                  >
-                    <History size={18} />
-                    <span>Histórico</span>
-                  </button>
-                )}
+              <div className="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 mb-4">
+                <div>
+                  <h1 className="h3 mb-1 fw-bold gradient-number">WhatsApp Connect</h1>
+                  <p className="text-muted mb-0">Conecte sua instância do WhatsApp</p>
+                </div>
+                <button
+                  type="button"
+                  className="btn btn-outline-primary d-flex align-items-center justify-content-center gap-2 hover-scale"
+                  onClick={() => setShowHistory(!showHistory)}
+                >
+                  <History size={18} />
+                  <span>{showHistory ? 'Voltar' : 'Histórico'}</span>
+                </button>
               </div>
 
-              {/* Mensagem de Erro */}
-              {error && (
-                <div className="alert alert-danger d-flex align-items-center gap-2 mb-4" role="alert">
-                  <AlertCircle size={18} />
-                  <span>{error}</span>
-                </div>
-              )}
-
-              {/* Histórico de Instâncias */}
-              {showHistory && (
-                <div className="mb-4">
-                  <div className="d-flex justify-content-between align-items-center mb-3">
-                    <h6 className="mb-0">Instâncias Recentes</h6>
-                    <button
-                      onClick={clearHistory}
-                      className="btn btn-sm btn-outline-danger d-flex align-items-center gap-1"
-                    >
-                      <Trash2 size={14} />
-                      <span>Limpar</span>
-                    </button>
-                  </div>
-                  <div className="list-group">
-                    {history.map((item, index) => (
-                      <button
-                        key={index}
-                        onClick={() => handleHistoryItemClick(item)}
-                        className="list-group-item list-group-item-action d-flex justify-content-between align-items-center"
-                      >
-                        <div>
-                          <h6 className="mb-1">{item.name}</h6>
-                          <small className="text-muted">
-                            Última conexão: {new Date(item.lastConnected).toLocaleString()}
-                          </small>
-                        </div>
-                        <span className={`badge bg-${item.status === 'connected' ? 'success' : 'secondary'}`}>
-                          {item.status === 'connected' ? 'Conectado' : 'Desconectado'}
-                        </span>
-                      </button>
-                    ))}
-                  </div>
-                </div>
-              )}
-
-              {!isConnected ? (
-                <>
-                  {/* Formulário de Nova Instância */}
-                  {!qrCodeSrc && (
-                    <div className="text-center mb-4">
-                      <div className="bg-light p-4 rounded-3 mb-4">
-                        <QrCodeIcon size={48} className="text-primary mb-3" />
-                        <p className="text-muted mb-0">
-                          Para começar, informe um nome para sua instância do WhatsApp
-                        </p>
+              {showHistory ? (
+                <div className="animate-slide-in">
+                  <div className="card-status-info p-3 rounded-3">
+                    <h5 className="mb-3 d-flex align-items-center gap-2">
+                      <History size={18} />
+                      Histórico de Conexões
+                    </h5>
+                    {history.length === 0 ? (
+                      <p className="text-muted mb-0">Nenhuma conexão registrada.</p>
+                    ) : (
+                      <div className="table-responsive">
+                        <table className="table table-hover mb-0">
+                          <thead>
+                            <tr>
+                              <th>Nome</th>
+                              <th>Última Conexão</th>
+                              <th>Status</th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            {history.map((instance) => (
+                              <tr key={instance.name}>
+                                <td>{instance.name}</td>
+                                <td>{new Date(instance.lastConnected).toLocaleString()}</td>
+                                <td>
+                                  <span className={`badge bg-${instance.status === 'connected' ? 'success' : 'danger'}`}>
+                                    {instance.status === 'connected' ? 'Conectado' : 'Desconectado'}
+                                  </span>
+                                </td>
+                              </tr>
+                            ))}
+                          </tbody>
+                        </table>
                       </div>
-                      <form onSubmit={handleSubmit}>
-                        <div className="input-group mb-3">
-                          <input
-                            type="text"
-                            className="form-control"
-                            placeholder="Nome da instância"
-                            value={instanceName}
-                            onChange={(e) => setInstanceName(e.target.value)}
-                            disabled={loading}
-                          />
+                    )}
+                  </div>
+                </div>
+              ) : (
+                <div className="animate-slide-in">
+                  <div className="mb-4">
+                    <div className="profile-form-group">
+                      <label className="form-label">Nome da Instância</label>
+                      <div className="input-group">
+                        <input
+                          type="text"
+                          className="form-control profile-form-control"
+                          placeholder="Digite o nome da instância"
+                          value={instanceName}
+                          onChange={(e) => setInstanceName(e.target.value)}
+                          disabled={isConnected || loading}
+                        />
+                        {(isConnected || loading) && (
                           <button
-                            type="submit"
-                            className="btn btn-primary d-flex align-items-center gap-2"
-                            disabled={loading || !instanceName.trim()}
+                            className="btn btn-outline-danger hover-scale"
+                            type="button"
+                            onClick={handleDisconnect}
                           >
-                            {loading ? (
-                              <>
-                                <Loader2 size={18} className="animate-spin" />
-                                <span>Gerando...</span>
-                              </>
-                            ) : (
-                              <>
-                                <QrCodeIcon size={18} />
-                                <span>Gerar QR Code</span>
-                              </>
-                            )}
+                            <Trash2 size={18} />
                           </button>
-                        </div>
-                      </form>
+                        )}
+                      </div>
+                    </div>
+
+                    {!isConnected && !loading && (
+                      <button
+                        className="btn btn-primary w-100 d-flex align-items-center justify-content-center gap-2 py-2 hover-scale"
+                        onClick={handleCreateInstance}
+                        disabled={!instanceName.trim()}
+                      >
+                        <QrCodeIcon size={18} />
+                        Gerar QR Code
+                      </button>
+                    )}
+                  </div>
+
+                  {loading && (
+                    <div className="text-center p-4">
+                      <div className="spinner-border text-primary mb-2" role="status">
+                        <span className="visually-hidden">Carregando...</span>
+                      </div>
+                      <p className="text-muted mb-0">
+                        {timer !== null ? `Reconectando em ${timer}s...` : 'Gerando QR Code...'}
+                      </p>
                     </div>
                   )}
 
-                  {/* QR Code */}
-                  {qrCodeSrc && (
-                    <div className="text-center">
-                      <div className="d-inline-block p-4 bg-light rounded-3 mb-4">
+                  {isConnected && (
+                    <div className="card-status-success p-4 rounded-4 text-center animate-slide-in">
+                      <div className="icon-glass rounded-circle p-3 d-inline-flex mb-3">
                         <Image
-                          src={qrCodeSrc}
-                          alt="QR Code WhatsApp"
-                          width={250}
-                          height={250}
-                          className="img-fluid"
+                          src="/images/conectado.png"
+                          alt="Conectado"
+                          width={48}
+                          height={48}
                         />
                       </div>
-                      {timer !== null && (
-                        <div className="alert alert-warning d-flex align-items-center gap-2" role="alert">
-                          <AlertCircle size={18} />
-                          <div>
-                            <p className="mb-1">QR Code expira em: {timer} segundos</p>
-                            <small>Escaneie o código QR com seu WhatsApp para conectar</small>
-                          </div>
-                        </div>
-                      )}
+                      <h4 className="gradient-number mb-2">WhatsApp Conectado!</h4>
+                      <p className="text-muted mb-0">
+                        Sua instância está ativa e pronta para uso.
+                      </p>
                     </div>
                   )}
-                </>
-              ) : (
-                /* Status Conectado */
-                <div className="text-center">
-                  <div className="d-inline-block p-4 bg-success bg-opacity-10 rounded-circle mb-4">
-                    <Image
-                      src="/images/conectado.png"
-                      alt="Conectado"
-                      width={120}
-                      height={120}
-                      className="img-fluid"
-                    />
-                  </div>
-                  <h4 className="text-success mb-3">WhatsApp Conectado!</h4>
-                  <p className="text-muted mb-4">
-                    Instância <strong>{instanceName}</strong> está ativa e pronta para uso.
-                  </p>
-                  <button
-                    onClick={resetInstance}
-                    className="btn btn-outline-danger d-flex align-items-center gap-2 mx-auto"
-                  >
-                    <Trash2 size={18} />
-                    <span>Desconectar WhatsApp</span>
-                  </button>
+
+                  {qrCodeSrc && !isConnected && !loading && (
+                    <div className="text-center p-4 animate-fade-in">
+                      <div className="qr-code-wrapper mb-3">
+                        <Image
+                          src={qrCodeSrc}
+                          alt="QR Code"
+                          width={256}
+                          height={256}
+                          className="img-fluid rounded-4"
+                        />
+                      </div>
+                      <p className="text-muted mb-0">
+                        Escaneie o QR Code com seu WhatsApp
+                      </p>
+                    </div>
+                  )}
                 </div>
               )}
             </div>

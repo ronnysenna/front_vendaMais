@@ -17,6 +17,7 @@ const schema = z.object({
   stockQuantity: z.string().min(1, "Quantidade em estoque é obrigatória"),
   category: z.string().optional(),
   variations: z.string().optional(),
+  color: z.string().optional(),
   image: z.any().optional(),
 });
 
@@ -36,6 +37,7 @@ export default function AddProductPage() {
       stockQuantity: "",
       category: "",
       variations: "",
+      color: "",
     },
   });
 
@@ -75,203 +77,215 @@ export default function AddProductPage() {
   };
 
   return (
-    <div className="container-fluid py-4">
-      <div className="row justify-content-center">
-        <div className="col-12 col-md-8 col-lg-6">
-          <div className="card border-0 shadow-sm">
-            <div className="card-body p-4">
-              <div className="d-flex align-items-center gap-3 mb-4">
-                <button
-                  type="button"
-                  className="btn btn-link text-muted p-0"
-                  onClick={() => router.back()}
-                >
-                  <ArrowLeft size={24} />
-                </button>
-                <h1 className="h3 mb-0">Adicionar Produto</h1>
-              </div>
+    <div className="container py-4">
+      <div className="card product-form-card p-4">
+        <div className="d-flex align-items-center mb-4">
+          <button
+            type="button"
+            className="back-button bg-transparent border-0"
+            onClick={() => router.back()}
+          >
+            <ArrowLeft size={24} />
+          </button>
+          <h1 className="h3 mb-0 ms-3">Adicionar Produto</h1>
+        </div>
 
-              <div className="text-center mb-4">
-                <div className="position-relative d-inline-block">
-                  <div className="rounded-3 overflow-hidden bg-light" style={{ width: '200px', height: '200px' }}>
-                    {previewUrl ? (
-                      <Image
-                        src={previewUrl}
-                        alt="Imagem do produto"
-                        width={200}
-                        height={200}
-                        className="img-fluid"
-                        style={{ objectFit: 'cover' }}
-                      />
-                    ) : (
-                      <div className="d-flex align-items-center justify-content-center h-100">
-                        <Camera size={48} className="text-muted" />
-                      </div>
-                    )}
-                  </div>
-                  <label
-                    htmlFor="image-upload"
-                    className="position-absolute bottom-0 end-0 bg-primary text-white rounded-circle p-2"
-                    style={{ cursor: 'pointer' }}
-                  >
-                    <Camera size={18} />
-                    <input
-                      id="image-upload"
-                      type="file"
-                      accept="image/*"
-                      className="d-none"
-                      onChange={handleImageChange}
-                    />
-                  </label>
+        <div className="text-center mb-4">
+          <div className="position-relative d-inline-block">
+            <div className="image-upload-area d-flex align-items-center justify-content-center" style={{ width: '200px', height: '200px' }}>
+              {previewUrl ? (
+                <Image
+                  src={previewUrl}
+                  alt="Imagem do produto"
+                  width={200}
+                  height={200}
+                  className="rounded-3 object-fit-cover w-100 h-100"
+                />
+              ) : (
+                <div className="text-center">
+                  <Camera size={48} className="text-muted mb-2" />
+                  <p className="small text-muted mb-0">Clique para adicionar uma imagem</p>
                 </div>
-              </div>
-
-              <Form {...form}>
-                <form onSubmit={form.handleSubmit(onSubmit)}>
-                  <div className="row g-3">
-                    <div className="col-12">
-                      <FormField
-                        control={form.control}
-                        name="name"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormControl>
-                              <input
-                                type="text"
-                                className="form-control"
-                                placeholder="Nome do produto"
-                                {...field}
-                              />
-                            </FormControl>
-                            <FormMessage className="text-danger small" />
-                          </FormItem>
-                        )}
-                      />
-                    </div>
-
-                    <div className="col-12">
-                      <FormField
-                        control={form.control}
-                        name="description"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormControl>
-                              <textarea
-                                className="form-control"
-                                placeholder="Descrição do produto"
-                                rows={3}
-                                {...field}
-                              />
-                            </FormControl>
-                            <FormMessage className="text-danger small" />
-                          </FormItem>
-                        )}
-                      />
-                    </div>
-
-                    <div className="col-md-6">
-                      <FormField
-                        control={form.control}
-                        name="value"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormControl>
-                              <input
-                                type="number"
-                                step="0.01"
-                                className="form-control"
-                                placeholder="Preço"
-                                {...field}
-                              />
-                            </FormControl>
-                            <FormMessage className="text-danger small" />
-                          </FormItem>
-                        )}
-                      />
-                    </div>
-
-                    <div className="col-md-6">
-                      <FormField
-                        control={form.control}
-                        name="stockQuantity"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormControl>
-                              <input
-                                type="number"
-                                className="form-control"
-                                placeholder="Quantidade em estoque"
-                                {...field}
-                              />
-                            </FormControl>
-                            <FormMessage className="text-danger small" />
-                          </FormItem>
-                        )}
-                      />
-                    </div>
-
-                    <div className="col-md-6">
-                      <FormField
-                        control={form.control}
-                        name="category"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormControl>
-                              <input
-                                type="text"
-                                className="form-control"
-                                placeholder="Categoria"
-                                {...field}
-                              />
-                            </FormControl>
-                            <FormMessage className="text-danger small" />
-                          </FormItem>
-                        )}
-                      />
-                    </div>
-
-                    <div className="col-md-6">
-                      <FormField
-                        control={form.control}
-                        name="variations"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormControl>
-                              <input
-                                type="text"
-                                className="form-control"
-                                placeholder="Variações (separadas por vírgula)"
-                                {...field}
-                              />
-                            </FormControl>
-                            <FormMessage className="text-danger small" />
-                          </FormItem>
-                        )}
-                      />
-                    </div>
-                  </div>
-
-                  <div className="mt-4">
-                    <button
-                      type="submit"
-                      className="btn btn-primary w-100 d-flex align-items-center justify-content-center gap-2"
-                      disabled={isLoading}
-                    >
-                      {isLoading ? (
-                        <>
-                          <span className="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
-                          <span>Cadastrando...</span>
-                        </>
-                      ) : (
-                        "Cadastrar Produto"
-                      )}
-                    </button>
-                  </div>
-                </form>
-              </Form>
+              )}
+              <input
+                id="image-upload"
+                type="file"
+                accept="image/*"
+                className="d-none"
+                onChange={handleImageChange}
+              />
             </div>
           </div>
         </div>
+
+        <Form {...form}>
+          <form onSubmit={form.handleSubmit(onSubmit)} className="row g-3">
+            <div className="col-12">
+              <FormField
+                control={form.control}
+                name="name"
+                render={({ field }) => (
+                  <FormItem>
+                    <label className="form-label">Nome do Produto</label>
+                    <FormControl>
+                      <input
+                        type="text"
+                        className="product-form-input w-100"
+                        placeholder="Digite o nome do produto"
+                        {...field}
+                      />
+                    </FormControl>
+                    <FormMessage className="text-danger small mt-1" />
+                  </FormItem>
+                )}
+              />
+            </div>
+
+            <div className="col-12">
+              <FormField
+                control={form.control}
+                name="description"
+                render={({ field }) => (
+                  <FormItem>
+                    <label className="form-label">Descrição</label>
+                    <FormControl>
+                      <textarea
+                        className="product-form-input w-100"
+                        placeholder="Digite a descrição do produto"
+                        rows={3}
+                        {...field}
+                      />
+                    </FormControl>
+                    <FormMessage className="text-danger small mt-1" />
+                  </FormItem>
+                )}
+              />
+            </div>
+
+            <div className="col-md-6">
+              <FormField
+                control={form.control}
+                name="value"
+                render={({ field }) => (
+                  <FormItem>
+                    <label className="form-label">Preço</label>
+                    <FormControl>
+                      <input
+                        type="number"
+                        step="0.01"
+                        className="product-form-input w-100"
+                        placeholder="R$ 0.00"
+                        {...field}
+                      />
+                    </FormControl>
+                    <FormMessage className="text-danger small mt-1" />
+                  </FormItem>
+                )}
+              />
+            </div>
+
+            <div className="col-md-6">
+              <FormField
+                control={form.control}
+                name="stockQuantity"
+                render={({ field }) => (
+                  <FormItem>
+                    <label className="form-label">Quantidade em Estoque</label>
+                    <FormControl>
+                      <input
+                        type="number"
+                        className="product-form-input w-100"
+                        placeholder="0"
+                        {...field}
+                      />
+                    </FormControl>
+                    <FormMessage className="text-danger small mt-1" />
+                  </FormItem>
+                )}
+              />
+            </div>
+
+            <div className="col-md-6">
+              <FormField
+                control={form.control}
+                name="category"
+                render={({ field }) => (
+                  <FormItem>
+                    <label className="form-label">Categoria</label>
+                    <FormControl>
+                      <input
+                        type="text"
+                        className="product-form-input w-100"
+                        placeholder="Digite a categoria"
+                        {...field}
+                      />
+                    </FormControl>
+                    <FormMessage className="text-danger small mt-1" />
+                  </FormItem>
+                )}
+              />
+            </div>
+
+            <div className="col-md-6">
+              <FormField
+                control={form.control}
+                name="color"
+                render={({ field }) => (
+                  <FormItem>
+                    <label className="form-label">Cor</label>
+                    <FormControl>
+                      <input
+                        type="text"
+                        className="product-form-input w-100"
+                        placeholder="Ex: Azul, Vermelho"
+                        {...field}
+                      />
+                    </FormControl>
+                    <FormMessage className="text-danger small mt-1" />
+                  </FormItem>
+                )}
+              />
+            </div>
+
+            <div className="col-md-6">
+              <FormField
+                control={form.control}
+                name="variations"
+                render={({ field }) => (
+                  <FormItem>
+                    <label className="form-label">Variações</label>
+                    <FormControl>
+                      <input
+                        type="text"
+                        className="product-form-input w-100"
+                        placeholder="Ex: P,M,G"
+                        {...field}
+                      />
+                    </FormControl>
+                    <FormMessage className="text-danger small mt-1" />
+                  </FormItem>
+                )}
+              />
+            </div>
+
+            <div className="col-12 mt-4">
+              <button
+                type="submit"
+                className="submit-button w-100 d-flex align-items-center justify-content-center gap-2"
+                disabled={isLoading}
+              >
+                {isLoading ? (
+                  <>
+                    <Loader2 className="animate-spin" size={20} />
+                    <span>Cadastrando...</span>
+                  </>
+                ) : (
+                  "Cadastrar Produto"
+                )}
+              </button>
+            </div>
+          </form>
+        </Form>
       </div>
     </div>
   );
