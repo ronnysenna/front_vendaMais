@@ -1,24 +1,15 @@
 "use client"
 
-import {
-  Form,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormControl,
-  FormMessage,
-} from "@/components/ui/form"
-import { Input } from "@/components/ui/input"
-import { Button } from "@/components/ui/button"
-import Image from "next/image"
-import { Loader2, Pencil } from "lucide-react"
+import { useState, useEffect } from "react"
 import { useForm } from "react-hook-form"
-import { useEffect, useState } from "react"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { z } from "zod"
+import Image from "next/image"
+import { Camera, Loader2 } from "lucide-react"
+import { Form, FormField, FormItem, FormControl, FormMessage } from "@/components/ui/form"
 
 const schema = z.object({
-  name: z.string().min(1),
+  name: z.string().min(1, "Nome é obrigatório"),
   phone: z.string().optional(),
   cpfCnpj: z.string().optional(),
   address: z.string().optional(),
@@ -31,6 +22,8 @@ export default function ProfilePage() {
   const [isEditing, setIsEditing] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
   const [previewUrl, setPreviewUrl] = useState<string | null>(null)
+  const [errorMessage, setErrorMessage] = useState("")
+  const [successMessage, setSuccessMessage] = useState("")
 
   const form = useForm<ProfileFormData>({
     resolver: zodResolver(schema),
@@ -42,151 +35,262 @@ export default function ProfilePage() {
     },
   })
 
+  // Carregar dados do perfil
   useEffect(() => {
-    fetch("/api/profile")
-      .then((res) => res.json())
-      .then((data) => {
+    async function loadProfile() {
+      try {
+        const response = await fetch("/api/profile")
+        if (!response.ok) throw new Error("Erro ao carregar perfil")
+        const data = await response.json()
+
+        // Atualizar formulário com dados do servidor
         form.reset(data)
-        setPreviewUrl(data.image || null)
-      })
-  }, [])
 
-  async function onSubmit(values: ProfileFormData) {
+        // Se houver imagem, atualizar preview
+        if (data.image) {
+          setPreviewUrl(data.image)
+        }
+      } catch (error) {
+        console.error("Erro ao carregar perfil:", error)
+        setErrorMessage("Erro ao carregar dados do perfil")
+      }
+    }
+
+    loadProfile()
+  }, [form])
+
+  const handleImageChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0]
+    if (file) {
+      const url = URL.createObjectURL(file)
+      setPreviewUrl(url)
+      form.setValue("image", file)
+    }
+  }
+
+  const onSubmit = async (data: ProfileFormData) => {
     setIsLoading(true)
+    setErrorMessage("")
+    setSuccessMessage("")
 
-    const formData = new FormData()
-    formData.append("name", values.name)
-    formData.append("phone", values.phone || "")
-    formData.append("cpfCnpj", values.cpfCnpj || "")
-    formData.append("address", values.address || "")
-    if (values.image?.[0]) {
-      formData.append("image", values.image[0])
-    }
+    try {
+      const formData = new FormData()
+      formData.append("name", data.name)
+      if (data.phone) formData.append("phone", data.phone)
+      if (data.cpfCnpj) formData.append("cpfCnpj", data.cpfCnpj)
+      if (data.address) formData.append("address", data.address)
+      if (data.image) formData.append("image", data.image)
 
-    const res = await fetch("/api/profile", {
-      method: "PATCH",
-      body: formData,
-    })
+      const response = await fetch("/api/profile", {
+        method: "PATCH",
+        body: formData,
+      })
 
-    if (res.ok) {
-      alert("Perfil atualizado com sucesso!")
+      if (!response.ok) {
+        const error = await response.json()
+        throw new Error(error.message || "Erro ao atualizar perfil")
+      }
+
+      setSuccessMessage("Perfil atualizado com sucesso!")
       setIsEditing(false)
-    } else {
-      alert("Erro ao atualizar perfil.")
+    } catch (error) {
+      console.error("Erro ao atualizar perfil:", error)
+      setErrorMessage(error instanceof Error ? error.message : "Erro ao atualizar perfil. Tente novamente.")
+    } finally {
+      setIsLoading(false)
     }
-
-    setIsLoading(false)
   }
 
   return (
-    <div className="max-w-xl mx-auto mt-10 text-white">
-      <div className="flex flex-col items-center mb-6 relative">
-        <h1 className="text-3xl font-bold text-[#fba931] mb-4">Perfil</h1>
-
-        <div className="relative">
-          <Image
-            src={previewUrl || "/placeholder-avatar.png"}
-            alt="Avatar"
-            width={120}
-            height={120}
-            className="rounded-full border-4 border-yellow-500 shadow-md"
-          />
-          {isEditing && (
-            <input
-              type="file"
-              accept="image/*"
-              className="absolute top-0 left-0 w-full h-full opacity-0 cursor-pointer"
-              onChange={(e) => form.setValue("image", e.target.files)}
-            />
+    <div className="container-fluid py-4">
+      <div className="row justify-content-center">
+        <div className="col-12 col-md-8 col-lg-6">
+          {successMessage && (
+            <div className="alert alert-success d-flex align-items-center gap-2" role="alert">
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" className="bi bi-check-circle-fill" viewBox="0 0 16 16">
+                <path d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0zm-3.97-3.03a.75.75 0 0 0-1.08.022L7.477 9.417 5.384 7.323a.75.75 0 0 0-1.06 1.06L6.97 11.03a.75.75 0 0 0 1.079-.02l3.992-4.99a.75.75 0 0 0-.01-1.05z" />
+              </svg>
+              {successMessage}
+            </div>
           )}
+
+          {errorMessage && (
+            <div className="alert alert-danger d-flex align-items-center gap-2" role="alert">
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" className="bi bi-exclamation-circle-fill" viewBox="0 0 16 16">
+                <path d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0zM8 4a.905.905 0 0 0-.9.995l.35 3.507a.552.552 0 0 0 1.1 0l.35-3.507A.905.905 0 0 0 8 4zm.002 6a1 1 0 1 0 0 2 1 1 0 0 0 0-2z" />
+              </svg>
+              {errorMessage}
+            </div>
+          )}
+
+          <div className="card">
+            <div className="card-body p-4">
+              <div className="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 mb-4">
+                <h1 className="h3 mb-0 fw-bold">Perfil</h1>
+                <button
+                  type="button"
+                  className="btn btn-outline-primary d-flex align-items-center justify-content-center gap-2 w-100 w-md-auto"
+                  onClick={() => setIsEditing(!isEditing)}
+                >
+                  <Camera size={18} />
+                  <span>{isEditing ? "Cancelar" : "Editar"}</span>
+                </button>
+              </div>
+
+              <div className="text-center mb-4">
+                <div className="position-relative d-inline-block">
+                  <div className="rounded-circle overflow-hidden bg-light shadow-sm" style={{ width: '120px', height: '120px' }}>
+                    {previewUrl ? (
+                      <Image
+                        src={previewUrl}
+                        alt="Foto do perfil"
+                        width={120}
+                        height={120}
+                        className="img-fluid hover-scale"
+                        style={{ objectFit: 'cover' }}
+                      />
+                    ) : (
+                      <div className="d-flex align-items-center justify-content-center h-100">
+                        <Camera size={40} className="text-muted" />
+                      </div>
+                    )}
+                  </div>
+                  {isEditing && (
+                    <label
+                      htmlFor="image-upload"
+                      className="position-absolute bottom-0 end-0 bg-primary text-white rounded-circle p-2 shadow-sm hover-scale"
+                      style={{ cursor: 'pointer', transition: 'transform 0.2s ease' }}
+                    >
+                      <Camera size={18} />
+                      <input
+                        id="image-upload"
+                        type="file"
+                        accept="image/*"
+                        className="d-none"
+                        onChange={handleImageChange}
+                      />
+                    </label>
+                  )}
+                </div>
+              </div>
+
+              <Form {...form}>
+                <form onSubmit={form.handleSubmit(onSubmit)}>
+                  <div className="row g-3">
+                    <div className="col-12">
+                      <FormField
+                        control={form.control}
+                        name="name"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormControl>
+                              <input
+                                type="text"
+                                className="form-control transition-all"
+                                placeholder="Nome completo"
+                                disabled={!isEditing}
+                                {...field}
+                              />
+                            </FormControl>
+                            <FormMessage className="text-danger small" />
+                          </FormItem>
+                        )}
+                      />
+                    </div>
+
+                    <div className="col-md-6">
+                      <FormField
+                        control={form.control}
+                        name="phone"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormControl>
+                              <input
+                                type="tel"
+                                className="form-control transition-all"
+                                placeholder="Telefone"
+                                disabled={!isEditing}
+                                {...field}
+                              />
+                            </FormControl>
+                            <FormMessage className="text-danger small" />
+                          </FormItem>
+                        )}
+                      />
+                    </div>
+
+                    <div className="col-md-6">
+                      <FormField
+                        control={form.control}
+                        name="cpfCnpj"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormControl>
+                              <input
+                                type="text"
+                                className="form-control transition-all"
+                                placeholder="CPF/CNPJ"
+                                disabled={!isEditing}
+                                {...field}
+                              />
+                            </FormControl>
+                            <FormMessage className="text-danger small" />
+                          </FormItem>
+                        )}
+                      />
+                    </div>
+
+                    <div className="col-12">
+                      <FormField
+                        control={form.control}
+                        name="address"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormControl>
+                              <input
+                                type="text"
+                                className="form-control transition-all"
+                                placeholder="Endereço completo"
+                                disabled={!isEditing}
+                                {...field}
+                              />
+                            </FormControl>
+                            <FormMessage className="text-danger small" />
+                          </FormItem>
+                        )}
+                      />
+                    </div>
+                  </div>
+
+                  <div className={`mt-4 ${isEditing ? 'animate-slide-in' : ''}`}>
+                    {isEditing ? (
+                      <button
+                        type="submit"
+                        className="btn btn-primary w-100 d-flex align-items-center justify-content-center gap-2 py-2 hover-scale-sm"
+                        disabled={isLoading}
+                      >
+                        {isLoading ? (
+                          <>
+                            <span className="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                            <span>Salvando alterações...</span>
+                          </>
+                        ) : (
+                          <>
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" className="bi bi-check2" viewBox="0 0 16 16">
+                              <path d="M13.854 3.646a.5.5 0 0 1 0 .708l-7 7a.5.5 0 0 1-.708 0l-3.5-3.5a.5.5 0 1 1 .708-.708L6.5 10.293l6.646-6.647a.5.5 0 0 1 .708 0z" />
+                            </svg>
+                            <span>Salvar Alterações</span>
+                          </>
+                        )}
+                      </button>
+                    ) : null}
+                  </div>
+                </form>
+              </Form>
+            </div>
+          </div>
         </div>
-
-        {!isEditing && (
-          <button
-            onClick={() => setIsEditing(true)}
-            className="flex items-center mt-2 gap-1 text-sm text-yellow-500 hover:underline"
-          >
-            <Pencil size={14} /> Editar Perfil
-          </button>
-        )}
       </div>
-
-      <Form {...form}>
-        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-          {/* Nome */}
-          <FormField
-            control={form.control}
-            name="name"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel className="text-[#fba931]">Nome</FormLabel>
-                <FormControl>
-                  {isEditing ? <Input {...field} /> : <p className="bg-gray-800 p-3 rounded">{field.value}</p>}
-                </FormControl>
-              </FormItem>
-            )}
-          />
-
-          {/* Telefone */}
-          <FormField
-            control={form.control}
-            name="phone"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel className="text-[#fba931]">Telefone</FormLabel>
-                <FormControl>
-                  {isEditing ? <Input {...field} /> : <p className="bg-gray-800 p-3 rounded">{field.value}</p>}
-                </FormControl>
-              </FormItem>
-            )}
-          />
-
-          {/* CPF/CNPJ */}
-          <FormField
-            control={form.control}
-            name="cpfCnpj"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel className="text-[#fba931]">CPF/CNPJ</FormLabel>
-                <FormControl>
-                  {isEditing ? <Input {...field} /> : <p className="bg-gray-800 p-3 rounded">{field.value}</p>}
-                </FormControl>
-              </FormItem>
-            )}
-          />
-
-          {/* Endereço */}
-          <FormField
-            control={form.control}
-            name="address"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel className="text-[#fba931]">Endereço</FormLabel>
-                <FormControl>
-                  {isEditing ? <Input {...field} /> : <p className="bg-gray-800 p-3 rounded">{field.value}</p>}
-                </FormControl>
-              </FormItem>
-            )}
-          />
-
-          {isEditing && (
-            <Button
-              type="submit"
-              disabled={isLoading}
-              className="w-full bg-yellow-500 hover:bg-yellow-400 text-gray-900 font-bold"
-            >
-              {isLoading ? (
-                <>
-                  <Loader2 className="h-4 w-4 animate-spin mr-2" />
-                  Salvando...
-                </>
-              ) : (
-                "Salvar Alterações"
-              )}
-            </Button>
-          )}
-        </form>
-      </Form>
     </div>
   )
 }

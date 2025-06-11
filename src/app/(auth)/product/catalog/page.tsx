@@ -2,21 +2,18 @@
 'use client';
 
 import { useState } from 'react';
-// Importe o Link do Next.js para navegação entre páginas
-import Link from 'next/link'; // <--- Importação adicionada
-import { SearchIcon, Loader2, EditIcon } from 'lucide-react'; // <--- EditIcon já importado, ótimo!
-import Image from 'next/image'; // <--- Importação já existente, ótimo!
+import Link from 'next/link';
+import Image from 'next/image';
+import { SearchIcon, Loader2, EditIcon, Plus } from 'lucide-react';
 
-// Defina a interface para o tipo de produto que você espera do seu backend
 interface Product {
-  id: string; // O ID do produto é crucial para a edição
+  id: string;
   name: string;
   description?: string;
-  value: string; // Ou number, dependendo como você lida com valores
-  stockQuantity: string; // Ou number
+  value: string;
+  stockQuantity: string;
   imageUrl?: string;
-  // Se o backend também retornar variações e categoria na pesquisa, adicione-os aqui:
-  variations?: string[]; // Por exemplo, se forem strings separadas por vírgula no DB, seu webhook deve converter para array
+  variations?: string[];
   category?: string;
 }
 
@@ -26,21 +23,20 @@ export default function ProductsCatalogPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  // **SEU WEBHOOK N8N PARA PESQUISA DE PRODUTOS**
-  const N8N_SEARCH_PRODUCTS_WEBHOOK_URL = 'https://n8n.ronnysenna.com.br/webhook/buscar-produtos'; // Substitua pelo seu URL real
+  const N8N_SEARCH_PRODUCTS_WEBHOOK_URL = 'https://n8n.ronnysenna.com.br/webhook/buscar-produtos';
 
   const handleSearch = async () => {
     setLoading(true);
     setError(null);
-    setProducts([]); // Limpa produtos anteriores
+    setProducts([]);
 
     try {
       const response = await fetch(N8N_SEARCH_PRODUCTS_WEBHOOK_URL, {
-        method: 'POST', // Geralmente POST para pesquisas com corpo de requisição
+        method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ searchTerm: searchTerm.trim() }), // Envia o termo de busca para o backend
+        body: JSON.stringify({ searchTerm: searchTerm.trim() }),
       });
 
       if (!response.ok) {
@@ -48,112 +44,137 @@ export default function ProductsCatalogPage() {
       }
 
       const data = await response.json();
-      // Verifique se a resposta do seu webhook n8n retorna um array de produtos.
-      // O n8n pode retornar a resposta em diferentes formatos, ajuste aqui se necessário.
-      // Assumindo que seu webhook retorna { products: [...] }
-      if (Array.isArray(data.products)) {
-        setProducts(data.products);
-      } else {
-        setProducts([]); // Se não for um array válido, não mostra nada
-        setError("Formato de resposta inesperado do backend.");
-      }
-
-    } catch (err) {
-      console.error('Erro na pesquisa de produtos:', err);
-      setError(`Não foi possível buscar os produtos. Erro: ${err instanceof Error ? err.message : String(err)}`);
+      setProducts(data);
+    } catch (error) {
+      console.error('Erro:', error);
+      setError(error instanceof Error ? error.message : 'Erro ao buscar produtos');
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div className="max-w-3xl mx-auto mt-10 text-white">
-      <div className="flex flex-col items-center p-8 bg-gray-800 rounded-xl shadow-lg text-center">
+    <div className="container-fluid py-4">
+      {/* Cabeçalho */}
+      <div className="d-flex justify-content-between align-items-center mb-4">
+        <h1 className="h3 mb-0">Catálogo de Produtos</h1>
+        <Link
+          href="/product/addProduct"
+          className="btn btn-primary d-flex align-items-center gap-2"
+        >
+          <Plus size={18} />
+          <span>Novo Produto</span>
+        </Link>
+      </div>
 
-        <h3 className="text-3xl font-bold mb-6 text-[#fba931]">Catálogo de Produtos</h3>
-
-        <div className="w-full mb-6 flex gap-2">
-          <input
-            type="text"
-            className="flex-grow p-3 bg-gray-700 border border-gray-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-[#fba931] focus:border-transparent placeholder:text-gray-400"
-            placeholder="Pesquisar produto por nome ou descrição..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            onKeyDown={(e) => { // Permite pesquisar ao apertar Enter
-                if (e.key === 'Enter') handleSearch();
-            }}
-            disabled={loading}
-          />
-          <button
-            className="p-3 bg-[#fba931] text-gray-900 font-bold rounded-lg shadow-md hover:bg-[#e09a2d] focus:outline-none focus:ring-2 focus:ring-[#fba931] focus:ring-opacity-75 disabled:opacity-50 disabled:cursor-not-allowed"
-            onClick={handleSearch}
-            disabled={loading}
-          >
-            {loading ? (
-              <Loader2 className="h-5 w-5 animate-spin" />
-            ) : (
-              <SearchIcon size={20} />
-            )}
-          </button>
+      {/* Barra de Pesquisa */}
+      <div className="card border-0 shadow-sm mb-4">
+        <div className="card-body">
+          <form onSubmit={(e) => { e.preventDefault(); handleSearch(); }}>
+            <div className="input-group">
+              <input
+                type="text"
+                className="form-control"
+                placeholder="Pesquisar produtos..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+              />
+              <button
+                type="submit"
+                className="btn btn-primary d-flex align-items-center gap-2"
+                disabled={loading}
+              >
+                {loading ? (
+                  <>
+                    <span className="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                    <span>Buscando...</span>
+                  </>
+                ) : (
+                  <>
+                    <SearchIcon size={18} />
+                    <span>Buscar</span>
+                  </>
+                )}
+              </button>
+            </div>
+          </form>
         </div>
+      </div>
 
-        {loading && (
-          <div className="flex items-center text-[#fba931] my-4">
-            <Loader2 className="h-6 w-6 animate-spin mr-2" />
-            <span>Buscando produtos...</span>
-          </div>
-        )}
+      {/* Mensagem de Erro */}
+      {error && (
+        <div className="alert alert-danger" role="alert">
+          {error}
+        </div>
+      )}
 
-        {error && (
-          <p className="text-red-500 my-4">{error}</p>
-        )}
-
-        {!loading && !error && products.length === 0 && searchTerm && (
-          <p className="text-gray-400 my-4">Nenhum produto encontrado para &quot;{searchTerm}&quot;.</p>
-        )}
-
-        {!loading && !error && products.length === 0 && !searchTerm && (
-          <p className="text-gray-400 my-4">Digite um termo para pesquisar produtos.</p>
-        )}
-
-        {!loading && !error && products.length > 0 && (
-          <div className="w-full text-left space-y-4 mt-6">
-            <h4 className="text-xl font-semibold text-[#fba931] mb-4">Resultados:</h4>
-            {products.map((product) => (
-              // Adicionado flex-col para o conteúdo e alinhamento no final, e espaço entre o texto e o botão
-              <div key={product.id} className="bg-gray-700 p-4 rounded-lg shadow-sm border border-gray-600 flex flex-col sm:flex-row sm:items-center gap-4">
-                {product.imageUrl && (
+      {/* Grade de Produtos */}
+      <div className="row row-cols-1 row-cols-md-2 row-cols-lg-3 row-cols-xl-4 g-4">
+        {products.map((product) => (
+          <div key={product.id} className="col">
+            <div className="card h-100 border-0 shadow-sm">
+              {/* Imagem do Produto */}
+              <div className="position-relative" style={{ height: '200px' }}>
+                {product.imageUrl ? (
                   <Image
                     src={product.imageUrl}
                     alt={product.name}
-                    width={80}
-                    height={80}
-                    className="rounded-md object-cover flex-shrink-0" // flex-shrink-0 para evitar que a imagem encolha
+                    fill
+                    style={{ objectFit: 'cover' }}
+                    className="card-img-top"
                   />
+                ) : (
+                  <div className="bg-light d-flex align-items-center justify-content-center h-100">
+                    <span className="text-muted">Sem imagem</span>
+                  </div>
                 )}
-                <div className="flex-grow"> {/* flex-grow para ocupar o espaço disponível */}
-                  <p className="text-lg font-bold text-white">{product.name}</p>
-                  {product.description && <p className="text-gray-300 text-sm">{product.description}</p>}
-                  <p className="text-yellow-400 font-semibold">Valor: R$ {product.value}</p>
-                  <p className="text-gray-400 text-sm">Estoque: {product.stockQuantity}</p>
-                  {/* Se você adicionar variações e categoria à interface Product, pode exibi-los aqui */}
-                  {product.category && <p className="text-gray-400 text-sm">Categoria: {product.category}</p>}
-                  {product.variations && product.variations.length > 0 && (
-                    <p className="text-gray-400 text-sm">Variações: {product.variations.join(', ')}</p>
+              </div>
+
+              <div className="card-body">
+                <h5 className="card-title mb-2">{product.name}</h5>
+                {product.description && (
+                  <p className="card-text text-muted small mb-2">{product.description}</p>
+                )}
+                <p className="card-text fw-bold text-primary mb-2">
+                  R$ {parseFloat(product.value).toFixed(2)}
+                </p>
+                <p className="card-text small mb-3">
+                  <span className="text-muted">Em estoque: </span>
+                  <span className="fw-medium">{product.stockQuantity}</span>
+                </p>
+
+                {/* Tags */}
+                <div className="mb-3">
+                  {product.category && (
+                    <span className="badge bg-secondary me-2">{product.category}</span>
                   )}
+                  {product.variations?.map((variation, index) => (
+                    <span key={index} className="badge bg-light text-dark me-1">
+                      {variation}
+                    </span>
+                  ))}
                 </div>
-                {/* Botão de Edição */}
+
+                {/* Botão de Editar */}
                 <Link
-                  href={`/product/${product.id}/editProduct`} // Caminho para a página de edição com o ID do produto
-                  className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg text-sm flex items-center justify-center gap-1 sm:self-end mt-2 sm:mt-0" // Ajustes de estilo
+                  href={`/product/${product.id}/edit`}
+                  className="btn btn-outline-primary w-100 d-flex align-items-center justify-content-center gap-2"
                 >
-                  <EditIcon size={16} /> Editar
+                  <EditIcon size={18} />
+                  <span>Editar</span>
                 </Link>
               </div>
-            ))}
+            </div>
           </div>
-        )}
+        ))}
       </div>
+
+      {/* Mensagem quando não há produtos */}
+      {!loading && products.length === 0 && (
+        <div className="text-center py-5">
+          <p className="text-muted mb-0">Nenhum produto encontrado</p>
+        </div>
+      )}
     </div>
   );
 }

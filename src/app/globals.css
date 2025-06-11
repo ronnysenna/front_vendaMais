@@ -1,5 +1,5 @@
-@import "tailwindcss";
-@import "tw-animate-css";
+@import "bootstrap/dist/css/bootstrap.min.css";
+@import "./bootstrap-custom.css";
 
 @custom-variant dark (&:is(.dark *));
 
@@ -44,19 +44,31 @@
 }
 
 :root {
-  --radius: 0.625rem;
-  --background: oklch(1 0 0);
-  --foreground: oklch(0.145 0 0);
-  --card: oklch(1 0 0);
-  --card-foreground: oklch(0.145 0 0);
-  --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.145 0 0);
-  --primary: oklch(0.205 0 0);
-  --primary-foreground: oklch(0.985 0 0);
-  --secondary: oklch(0.97 0 0);
-  --secondary-foreground: oklch(0.205 0 0);
-  --muted: oklch(0.97 0 0);
-  --muted-foreground: oklch(0.556 0 0);
+  /* Cores principais do tema */
+  --brand-primary: #fba931;
+  --brand-primary-hover: #e59016;
+  --brand-primary-active: #d48014;
+  --brand-secondary: #6c757d;
+  --brand-success: #198754;
+  --brand-info: #0dcaf0;
+  --brand-warning: #ffc107;
+  --brand-danger: #dc3545;
+
+  /* Bootstrap overrides */
+  --bs-primary: var(--brand-primary);
+  --bs-primary-rgb: 251, 169, 49;
+  --bs-secondary: var(--brand-secondary);
+  --bs-success: var(--brand-success);
+  --bs-info: var(--brand-info);
+  --bs-warning: var(--brand-warning);
+  --bs-danger: var(--brand-danger);
+  --bs-light: #f8f9fa;
+  --bs-dark: #212529;
+  --bs-body-bg: #ffffff;
+  --bs-body-color: #212529;
+  --bs-border-radius: 0.625rem;
+  --bs-link-color: var(--brand-primary);
+  --bs-link-hover-color: var(--brand-primary-hover);
   --accent: oklch(0.97 0 0);
   --accent-foreground: oklch(0.205 0 0);
   --destructive: oklch(0.577 0.245 27.325);
@@ -135,3 +147,240 @@
   animation: background 15s ease infinite;
 }
 
+/* Personalizações do Bootstrap */
+.btn-primary {
+  --bs-btn-bg: var(--brand-primary);
+  --bs-btn-border-color: var(--brand-primary);
+  --bs-btn-hover-bg: var(--brand-primary-hover);
+  --bs-btn-hover-border-color: var(--brand-primary-hover);
+  --bs-btn-active-bg: var(--brand-primary-active);
+  --bs-btn-active-border-color: var(--brand-primary-active);
+}
+
+.form-control {
+  transition:
+    border-color 0.2s ease,
+    box-shadow 0.2s ease;
+  font-size: 0.95rem;
+}
+
+.form-control:focus {
+  border-color: var(--brand-primary);
+  box-shadow: 0 0 0 0.25rem rgba(var(--bs-primary-rgb), 0.15);
+}
+
+.form-control:disabled {
+  background-color: rgba(var(--bs-dark-rgb), 0.05);
+  cursor: not-allowed;
+}
+
+.card {
+  --bs-card-border-radius: var(--bs-border-radius);
+  border: none;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+  transition:
+    transform 0.2s ease,
+    box-shadow 0.2s ease;
+}
+
+.card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.nav-link {
+  color: rgba(255, 255, 255, 0.75);
+  transition: all 0.2s ease-in-out;
+}
+
+.nav-link:hover,
+.nav-link:focus {
+  color: var(--brand-primary);
+  transform: translateY(-1px);
+}
+
+.nav-link.active {
+  color: var(--brand-primary) !important;
+  background-color: rgba(var(--bs-primary-rgb), 0.1) !important;
+  font-weight: 600;
+}
+
+/* Alertas */
+.alert {
+  border: none;
+  border-radius: var(--bs-border-radius);
+  padding: 1rem;
+  margin-bottom: 1rem;
+  animation: slideIn 0.3s ease;
+}
+
+.alert-success {
+  background-color: rgba(var(--bs-success-rgb), 0.1);
+  color: var(--bs-success);
+}
+
+.alert-danger {
+  background-color: rgba(var(--bs-danger-rgb), 0.1);
+  color: var(--bs-danger);
+}
+
+.alert-warning {
+  background-color: rgba(var(--bs-warning-rgb), 0.1);
+  color: var(--bs-warning);
+}
+
+.alert-info {
+  background-color: rgba(var(--bs-info-rgb), 0.1);
+  color: var(--bs-info);
+}
+
+/* Variantes de botões com animações */
+.btn {
+  position: relative;
+  transition: all 0.2s ease;
+  transform-origin: center;
+}
+
+.btn:active {
+  transform: scale(0.98);
+}
+
+.btn-primary {
+  background: linear-gradient(
+    45deg,
+    var(--brand-primary) 0%,
+    var(--brand-primary-hover) 100%
+  );
+  border: none;
+  background-size: 200% auto;
+  transition: 0.3s;
+}
+
+.btn-primary:hover {
+  background-position: right center;
+}
+
+.btn-outline-primary {
+  border: 2px solid var(--brand-primary);
+  color: var(--brand-primary);
+}
+
+.btn-outline-primary:hover {
+  background: var(--brand-primary);
+  color: white;
+  border-color: var(--brand-primary);
+}
+
+/* Form Control Label Animation */
+.form-floating > .form-control:focus ~ label,
+.form-floating > .form-control:not(:placeholder-shown) ~ label {
+  color: var(--brand-primary);
+  transform: scale(0.85) translateY(-0.5rem) translateX(0.15rem);
+}
+
+/* Skeleton Loading Animation */
+@keyframes skeleton-loading {
+  0% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0 50%;
+  }
+}
+
+.skeleton {
+  background: linear-gradient(
+    90deg,
+    rgba(var(--bs-secondary-rgb), 0.1) 25%,
+    rgba(var(--bs-secondary-rgb), 0.15) 37%,
+    rgba(var(--bs-secondary-rgb), 0.1) 63%
+  );
+  background-size: 400% 100%;
+  animation: skeleton-loading 1.4s ease infinite;
+}
+
+/* Animações */
+@keyframes slideIn {
+  from {
+    transform: translateY(1rem);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.animate-slide-in {
+  animation: slideIn 0.3s ease forwards;
+}
+
+.animate-fade-in {
+  animation: fadeIn 0.3s ease forwards;
+}
+
+/* Transições */
+.transition-all {
+  transition: all 0.2s ease;
+}
+
+.transition-transform {
+  transition: transform 0.2s ease;
+}
+
+.transition-opacity {
+  transition: opacity 0.2s ease;
+}
+
+/* Escala no hover */
+.hover-scale {
+  transition: transform 0.2s ease;
+}
+
+.hover-scale:hover {
+  transform: scale(1.02);
+}
+
+.hover-scale-sm:hover {
+  transform: scale(1.01);
+}
+
+.hover-scale-lg:hover {
+  transform: scale(1.05);
+}
+
+/* Input e Form Styles */
+.form-control {
+  transition:
+    border-color 0.2s ease,
+    box-shadow 0.2s ease;
+  font-size: 0.95rem;
+}
+
+.form-control:focus {
+  border-color: var(--brand-primary);
+  box-shadow: 0 0 0 0.25rem rgba(var(--bs-primary-rgb), 0.15);
+}
+
+.form-control:disabled {
+  background-color: rgba(var(--bs-dark-rgb), 0.05);
+  cursor: not-allowed;
+}
+
+/* Form Label Animation */
+.form-label {
+  transition: color 0.2s ease;
+}
+
+.form-control:focus + .form-label {
+  color: var(--brand-primary);
+}

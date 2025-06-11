@@ -1,0 +1,150 @@
+/* Cores personalizadas */
+:root {
+  --bs-primary: #fba931;
+  --bs-primary-rgb: 251, 169, 49;
+}
+
+.bg-gradient-dark {
+  background: linear-gradient(180deg, #1a1d21 0%, #2c3137 100%);
+}
+
+.min-vh-75 {
+  min-height: 75vh;
+}
+
+.text-primary {
+  color: var(--bs-primary) !important;
+}
+
+/* Botões */
+.btn-primary {
+  --bs-btn-color: #fff;
+  --bs-btn-bg: var(--bs-primary);
+  --bs-btn-border-color: var(--bs-primary);
+  --bs-btn-hover-bg: #e59016;
+  --bs-btn-hover-border-color: #e59016;
+  --bs-btn-focus-shadow-rgb: 251, 169, 49;
+  --bs-btn-active-bg: #d48014;
+  --bs-btn-active-border-color: #d48014;
+}
+
+/* Cards */
+.card {
+  border: none;
+  border-radius: 0.625rem;
+}
+
+.card-body {
+  padding: 1.5rem;
+}
+
+/* Formulários */
+.form-control:focus {
+  border-color: var(--bs-primary);
+  box-shadow: 0 0 0 0.25rem rgba(var(--bs-primary-rgb), 0.25);
+}
+
+/* Utilitários */
+.bg-dark {
+  background-color: #1a1d21 !important;
+}
+
+/* Navegação */
+.nav-link {
+  color: rgba(255, 255, 255, 0.75);
+  transition: color 0.15s ease-in-out;
+}
+
+.nav-link:hover,
+.nav-link:focus {
+  color: var(--bs-primary);
+}
+
+.nav-link.active {
+  color: var(--bs-primary) !important;
+  background-color: rgba(var(--bs-primary-rgb), 0.1) !important;
+}
+
+/* Alertas */
+.alert {
+  border: none;
+  border-radius: 0.625rem;
+}
+
+/* Badges */
+.badge {
+  border-radius: 0.5rem;
+  padding: 0.35rem 0.65rem;
+}
+
+/* Sombras */
+.shadow-sm {
+  box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075) !important;
+}
+
+.shadow {
+  box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15) !important;
+}
+
+/* Input Groups */
+.input-group {
+  border-radius: 0.625rem;
+  overflow: hidden;
+}
+
+.input-group .form-control:first-child {
+  border-top-left-radius: 0.625rem;
+  border-bottom-left-radius: 0.625rem;
+}
+
+.input-group .btn:last-child {
+  border-top-right-radius: 0.625rem;
+  border-bottom-right-radius: 0.625rem;
+}
+
+/* Sidebar personalizada */
+.sidebar {
+  background-color: var(--bs-dark);
+  width: 280px;
+  min-height: 100vh;
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 1030;
+}
+
+.sidebar-content {
+  padding: 1.5rem;
+}
+
+.sidebar-brand {
+  padding: 1rem 1.5rem;
+  margin-bottom: 1rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.sidebar-nav {
+  padding: 0.5rem 0;
+}
+
+/* Ajustes responsivos */
+@media (max-width: 767.98px) {
+  .sidebar {
+    transform: translateX(-100%);
+    transition: transform 0.3s ease-in-out;
+  }
+
+  .sidebar.show {
+    transform: translateX(0);
+  }
+
+  .content {
+    margin-left: 0 !important;
+  }
+}
+
+@media (min-width: 768px) {
+  .content {
+    margin-left: 280px;
+  }
+}

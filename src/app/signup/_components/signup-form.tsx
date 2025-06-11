@@ -5,16 +5,12 @@ import { useRouter } from "next/navigation";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
-import { Eye, EyeOff, Loader2 } from "lucide-react";
-
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
+import { Eye, EyeOff } from "lucide-react";
 import {
   Form,
   FormControl,
   FormField,
   FormItem,
-  FormLabel,
   FormMessage,
 } from "@/components/ui/form";
 import { authClient } from "@/lib/auth-client";
@@ -57,8 +53,8 @@ export function SignupForm() {
     },
   });
 
-
   async function onSubmit(formData: SignupFormValues) {
+    setIsLoading(true);
     try {
       const { data, error } = await authClient.signUp.email(
         {
@@ -80,136 +76,154 @@ export function SignupForm() {
       );
     } catch (err) {
       console.error("Erro na requisição:", err);
+    } finally {
+      setIsLoading(false);
     }
   }
 
-
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-        <FormField
-          control={form.control}
-          name="name"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel className=" text-[#fba931] font-bold">Nome</FormLabel>
-              <FormControl>
-                <Input
-                  placeholder="Seu nome completo"
-                  {...field}
-                  disabled={isLoading}
-                />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-
-        <FormField
-          control={form.control}
-          name="email"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel  className=" text-[#fba931] font-bold">Email</FormLabel>
-              <FormControl>
-                <Input
-                  placeholder="seu@email.com"
-                  type="email"
-                  {...field}
-                  disabled={isLoading}
-                />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-
-        <FormField
-          control={form.control}
-          name="password"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel  className=" text-[#fba931] font-bold">Senha</FormLabel>
-              <FormControl>
-                <div className="relative">
-                  <Input
-                    placeholder="••••••••"
-                    type={showPassword ? "text" : "password"}
-                    {...field}
+      <form onSubmit={form.handleSubmit(onSubmit)} className="needs-validation">
+        <div className="mb-4">
+          <FormField
+            control={form.control}
+            name="name"
+            render={({ field }) => (
+              <FormItem>
+                <label htmlFor="name" className="form-label text-dark">
+                  Nome Completo
+                </label>
+                <FormControl>
+                  <input
+                    type="text"
+                    className={`form-control ${form.formState.errors.name ? "is-invalid" : ""
+                      }`}
+                    id="name"
+                    placeholder="Digite seu nome completo"
                     disabled={isLoading}
+                    {...field}
                   />
-                  <Button
+                </FormControl>
+                <FormMessage className="invalid-feedback" />
+              </FormItem>
+            )}
+          />
+        </div>
+
+        <div className="mb-4">
+          <FormField
+            control={form.control}
+            name="email"
+            render={({ field }) => (
+              <FormItem>
+                <label htmlFor="email" className="form-label text-dark">
+                  Email
+                </label>
+                <FormControl>
+                  <input
+                    type="email"
+                    className={`form-control ${form.formState.errors.email ? "is-invalid" : ""
+                      }`}
+                    id="email"
+                    placeholder="Digite seu email"
+                    disabled={isLoading}
+                    {...field}
+                  />
+                </FormControl>
+                <FormMessage className="invalid-feedback" />
+              </FormItem>
+            )}
+          />
+        </div>
+
+        <div className="mb-4">
+          <FormField
+            control={form.control}
+            name="password"
+            render={({ field }) => (
+              <FormItem>
+                <label htmlFor="password" className="form-label text-dark">
+                  Senha
+                </label>
+                <div className="input-group">
+                  <FormControl>
+                    <input
+                      type={showPassword ? "text" : "password"}
+                      className={`form-control ${form.formState.errors.password ? "is-invalid" : ""
+                        }`}
+                      id="password"
+                      placeholder="Digite sua senha"
+                      disabled={isLoading}
+                      {...field}
+                    />
+                  </FormControl>
+                  <button
+                    className="btn btn-outline-secondary"
                     type="button"
-                    variant="ghost"
-                    size="sm"
-                    className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
                     onClick={() => setShowPassword(!showPassword)}
-                    disabled={isLoading}
                   >
-                    {showPassword ? (
-                      <EyeOff className="h-4 w-4 text-muted-foreground" />
-                    ) : (
-                      <Eye className="h-4 w-4 text-muted-foreground" />
-                    )}
-                    <span className="sr-only">
-                      {showPassword ? "Esconder senha" : "Mostrar senha"}
-                    </span>
-                  </Button>
+                    {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                  </button>
+                  <FormMessage className="invalid-feedback" />
                 </div>
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
+              </FormItem>
+            )}
+          />
+        </div>
 
-        <FormField
-          control={form.control}
-          name="confirmPassword"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel className=" text-[#fba931] font-bold">Confirmar Senha</FormLabel>
-              <FormControl>
-                <div className="relative">
-                  <Input
-                    placeholder="••••••••"
-                    type={showConfirmPassword ? "text" : "password"}
-                    {...field}
-                    disabled={isLoading}
-                  />
-                  <Button
+        <div className="mb-4">
+          <FormField
+            control={form.control}
+            name="confirmPassword"
+            render={({ field }) => (
+              <FormItem>
+                <label htmlFor="confirmPassword" className="form-label text-dark">
+                  Confirmar Senha
+                </label>
+                <div className="input-group">
+                  <FormControl>
+                    <input
+                      type={showConfirmPassword ? "text" : "password"}
+                      className={`form-control ${form.formState.errors.confirmPassword ? "is-invalid" : ""
+                        }`}
+                      id="confirmPassword"
+                      placeholder="Confirme sua senha"
+                      disabled={isLoading}
+                      {...field}
+                    />
+                  </FormControl>
+                  <button
+                    className="btn btn-outline-secondary"
                     type="button"
-                    variant="ghost"
-                    size="sm"
-                    className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
                     onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                    disabled={isLoading}
                   >
-                    {showConfirmPassword ? (
-                      <EyeOff className="h-4 w-4 text-muted-foreground" />
-                    ) : (
-                      <Eye className="h-4 w-4 text-muted-foreground" />
-                    )}
-                    <span className="sr-only">
-                      {showConfirmPassword ? "Esconder senha" : "Mostrar senha"}
-                    </span>
-                  </Button>
+                    {showConfirmPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                  </button>
+                  <FormMessage className="invalid-feedback" />
                 </div>
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
+              </FormItem>
+            )}
+          />
+        </div>
 
-        <Button type="submit" className="w-full  bg-emerald-700 hover:bg-emerald-900 " disabled={isLoading}>
-          {form.formState.isSubmitting ? (
+        <button
+          type="submit"
+          className="btn btn-primary w-100 btn-lg d-flex align-items-center justify-content-center gap-2"
+          disabled={isLoading}
+        >
+          {isLoading ? (
             <>
-              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-              Cadastrando...
+              <span
+                className="spinner-border spinner-border-sm"
+                role="status"
+                aria-hidden="true"
+              />
+              <span>Cadastrando...</span>
             </>
           ) : (
-            "Cadastrar"
+            "Criar Conta"
           )}
-        </Button>
+        </button>
       </form>
     </Form>
   );

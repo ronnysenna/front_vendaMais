@@ -1,5 +1,5 @@
 import { ReactNode } from "react"
-import Sidebar from "../_components/sidebar"
+import { ModernSidebar } from "@/components/ui/modern-sidebar"
 import { getProtectedSession } from "@/lib/get-protected-session"
 import "../globals.css"
 
@@ -7,13 +7,13 @@ export default async function AuthenticatedLayout({ children }: { children: Reac
   const session = await getProtectedSession()
 
   return (
-    <div className="flex min-h-screen bg-gray-900 text-white">
-      {/* Sidebar sempre renderizada, mas visível só no md: */}
-      <Sidebar userName={session.user.name ?? "Usuário"} />
-      
-      {/* Conteúdo: sem margem lateral em mobile, com ml-64 a partir de md: */}
-      <main className="flex-1 w-full px-4 py-6 md:ml-64">
-        {children}
+    <div className="d-flex vh-100">
+      <ModernSidebar userName={session.user.name ?? "Usuário"} />
+
+      <main className="flex-grow-1 bg-light p-3 p-md-4 overflow-auto">
+        <div className="container-fluid py-2 py-md-3 mt-md-0 mt-5">
+          {children}
+        </div>
       </main>
     </div>
   )

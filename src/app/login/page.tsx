@@ -1,35 +1,51 @@
 import Link from "next/link"
 import { LoginForm } from "../_components/login-form"
 import Image from "next/image"
-import logoImg from "@/../public/images/logo1.png"
+import logoImg from "@/../public/images/logo.png"
 
 export default function LoginPage() {
   return (
-    <div className="flex min-h-screen flex-col items-center justify-center p-4 bg-gray-900">
-      <div className="w-full max-w-md space-y-8">
-        <div className="text-center space-y-2">
-          <Image
-            src={logoImg}
-            alt="Logo"
-            width={200}
-            height={200}
-            className="mx-auto mb-7.5"
-          />
-          <h1 className="mt-8 text-4xl font-bold mb-4">Login</h1>
-          <p className="mt-3 text-sm text-muted-foreground">
-            Entre com suas credenciais para acessar sua conta
-          </p>
-        </div>
+    <div className="min-vh-100 d-flex align-items-center justify-content-center bg-gradient-dark py-5">
+      <div className="container">
+        <div className="row justify-content-center">
+          <div className="col-12 col-md-8 col-lg-6">
+            {/* Logo e Cabeçalho */}
+            <div className="text-center mb-4">
+              <Image
+                src={logoImg}
+                alt="Logo"
+                width={320}
+                height={320}
+                className="img-fluid mb-4"
+              />
+              <h1 className="display-6 fw-bold text-white mb-2">
+                Bem-vindo ao VendaMais
+              </h1>
+              <p className="text-light-emphasis mb-2">
+                Entre com suas credenciais para acessar sua conta
+              </p>
+            </div>
 
-        <LoginForm />
+            {/* Card do Formulário */}
+            <div className="card border-0 shadow-lg">
+              <div className="card-body p-4 p-md-5">
+                <LoginForm />
+              </div>
+            </div>
 
-        <div className="text-center text-sm">
-          <p>
-            Não tem uma conta?{" "}
-            <Link href="/signup" className="text-[#fba931] font-bold hover:underline">
-              Cadastre-se
-            </Link>
-          </p>
+            {/* Link para Cadastro */}
+            <div className="text-center mt-4">
+              <p className="text-light">
+                Não tem uma conta?{" "}
+                <Link
+                  href="/signup"
+                  className="text-primary text-decoration-none fw-semibold"
+                >
+                  Cadastre-se
+                </Link>
+              </p>
+            </div>
+          </div>
         </div>
       </div>
     </div>

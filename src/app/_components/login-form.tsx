@@ -5,18 +5,7 @@ import { useRouter } from "next/navigation"
 import { z } from "zod"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useForm } from "react-hook-form"
-import { Eye, EyeOff, Loader2 } from "lucide-react"
-
-import {
-  Form,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormControl,
-  FormMessage
-} from "@/components/ui/form"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
+import { Eye, EyeOff } from "lucide-react"
 import { authClient } from "@/lib/auth-client"
 
 const loginSchema = z.object({
@@ -31,127 +20,126 @@ export function LoginForm() {
   const [isLoading, setIsLoading] = useState(false)
   const router = useRouter()
 
-  const form = useForm<LoginFormValues>({
-    resolver: zodResolver(loginSchema),
-    defaultValues: {
-      email: "",
-      password: "",
-    },
+  const {
+    register,
+    handleSubmit,
+    formState: { errors, isSubmitting }
+  } = useForm<LoginFormValues>({
+    resolver: zodResolver(loginSchema)
   })
 
   async function onSubmit(formData: LoginFormValues) {
     setIsLoading(true)
-    await authClient.signIn.email(
-      {
-        email: formData.email,
-        password: formData.password,
-        callbackURL: "/dashboard",
-      },
-      {
-        onSuccess: () => router.replace("/dashboard"),
-        onError: (ctx) => console.error("Erro ao logar", ctx),
-      }
-    )
-    setIsLoading(false)
+    try {
+      await authClient.signIn.email(
+        {
+          email: formData.email,
+          password: formData.password,
+          callbackURL: "/dashboard",
+        },
+        {
+          onSuccess: () => router.replace("/dashboard"),
+          onError: (ctx) => console.error("Erro ao logar", ctx),
+        }
+      )
+    } finally {
+      setIsLoading(false)
+    }
   }
 
   async function handleSignInGoogle() {
-    await authClient.signIn.social({
-      provider: "google",
-      callbackURL: "/dashboard",
-    }, {
-      onSuccess: () => router.replace("/dashboard"),
-      onError: (ctx) => console.error("Erro ao logar", ctx),
-    })
+    try {
+      await authClient.signIn.social({
+        provider: "google",
+        callbackURL: "/dashboard",
+      }, {
+        onSuccess: () => router.replace("/dashboard"),
+        onError: (ctx) => console.error("Erro ao logar", ctx),
+      })
+    } catch (error) {
+      console.error("Erro ao fazer login com Google:", error)
+    }
   }
 
   return (
-    <div className="bg-gray-800 p-6 rounded-lg shadow-md text-white space-y-2 w-full">
-      <h1 className="text-2xl font-bold text-center text-[#fba931]">Acessar Conta</h1>
+    <form onSubmit={handleSubmit(onSubmit)} className="needs-validation">
+      <div className="mb-4">
+        <label htmlFor="email" className="form-label text-dark">Email</label>
+        <input
+          type="email"
+          className={`form-control ${errors.email ? 'is-invalid' : ''}`}
+          id="email"
+          placeholder="Digite seu email"
+          disabled={isLoading}
+          {...register('email')}
+        />
+        {errors.email && (
+          <div className="invalid-feedback">
+            {errors.email.message}
+          </div>
+        )}
+      </div>
 
-      <Form {...form}>
-        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-5">
-          {/* Email */}
-          <FormField
-            control={form.control}
-            name="email"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel className="text-[#fba931]">Email</FormLabel>
-                <FormControl>
-                  <Input
-                    placeholder="seu@email.com"
-                    type="email"
-                    {...field}
-                    disabled={isLoading}
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
+      <div className="mb-4">
+        <label htmlFor="password" className="form-label text-dark">Senha</label>
+        <div className="input-group">
+          <input
+            type={showPassword ? "text" : "password"}
+            className={`form-control ${errors.password ? 'is-invalid' : ''}`}
+            id="password"
+            placeholder="Digite sua senha"
+            disabled={isLoading}
+            {...register('password')}
           />
-
-          {/* Senha */}
-          <FormField
-            control={form.control}
-            name="password"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel className="text-[#fba931]">Senha</FormLabel>
-                <FormControl>
-                  <div className="relative">
-                    <Input
-                      placeholder="••••••••"
-                      type={showPassword ? "text" : "password"}
-                      {...field}
-                      disabled={isLoading}
-                    />
-                    <button
-                      type="button"
-                      onClick={() => setShowPassword(!showPassword)}
-                      className="absolute right-2 top-1/2 -translate-y-1/2 text-muted-foreground"
-                    >
-                      {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
-                    </button>
-                  </div>
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-
-          <Button
-            type="submit"
-            className="w-full bg-yellow-500 hover:bg-yellow-400 text-gray-900 font-bold"
-            disabled={form.formState.isSubmitting || isLoading}
-          >
-            {isLoading ? (
-              <>
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                Entrando...
-              </>
-            ) : (
-              "Entrar"
-            )}
-          </Button>
-
-          <div className="text-center text-sm text-gray-400">ou</div>
-
-          <Button
+          <button
             type="button"
-            variant="outline"
-            className="w-full border border-gray-300 hover:bg-gray-100 bg-white text-[#3C4043]"
-            onClick={handleSignInGoogle}
+            className="btn btn-outline-secondary"
+            onClick={() => setShowPassword(!showPassword)}
           >
-            <img
-              src="https://developers.google.com/identity/images/g-logo.png"
-              alt="Google"
-              className="mr-2 h-4 w-4"
+            {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+          </button>
+          {errors.password && (
+            <div className="invalid-feedback">
+              {errors.password.message}
+            </div>
+          )}
+        </div>
+      </div>
+
+      <button
+        type="submit"
+        className="btn btn-primary w-100 btn-lg d-flex align-items-center justify-content-center gap-2 mb-3"
+        disabled={isLoading}
+      >
+        {isLoading ? (
+          <>
+            <span
+              className="spinner-border spinner-border-sm"
+              role="status"
+              aria-hidden="true"
             />
-            Entrar com Google
-          </Button>
-        </form>
-      </Form>
-    </div>
+            <span>Entrando...</span>
+          </>
+        ) : (
+          "Entrar"
+        )}
+      </button>
+
+      <div className="text-center text-muted mb-3">ou</div>
+
+      <button
+        type="button"
+        className="btn btn-light w-100 d-flex align-items-center justify-content-center gap-2 border"
+        onClick={handleSignInGoogle}
+      >
+        <img
+          src="https://developers.google.com/identity/images/g-logo.png"
+          alt="Google"
+          width="18"
+          height="18"
+        />
+        <span>Entrar com Google</span>
+      </button>
+    </form>
   )
 }
