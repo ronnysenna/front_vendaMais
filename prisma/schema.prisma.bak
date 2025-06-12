@@ -1,11 +1,18 @@
-generator client {
-  provider = "prisma-client-js"
-  output   = "../src/generated/prisma"
+generdatasource db {
+provider = "postgresql"
+url      = env("DATABASE_URL")
+}ent {
+provider = "prisma-client-js"
+output   = "../src/generated/prisma"
 }
 
 datasource db {
-  provider = "postgresql"
-  url      = env("DATABASE_URL")
+  provider       = "postgresql"
+  url            = env("DATABASE_URL")
+  // Configurações de conexão
+  poolTimeout    = 20
+  maxConnections = 10
+  minConnections = 1
 }
 
 model User {
@@ -14,12 +21,12 @@ model User {
   email         String    @unique
   emailVerified Boolean
   image         String?
-  createdAt     DateTime
-  updatedAt     DateTime
+  phone         String?
+  cpfCnpj       String?
   address       String?
   birthDate     DateTime?
-  cpfCnpj       String?
-  phone         String?
+  createdAt     DateTime
+  updatedAt     DateTime
   accounts      Account[]
   sessions      Session[]
 

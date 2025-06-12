@@ -7,6 +7,10 @@ CREATE TABLE "user" (
     "image" TEXT,
     "createdAt" TIMESTAMP(3) NOT NULL,
     "updatedAt" TIMESTAMP(3) NOT NULL,
+    "address" TEXT,
+    "birthDate" TIMESTAMP(3),
+    "cpfCnpj" TEXT,
+    "phone" TEXT,
 
     CONSTRAINT "user_pkey" PRIMARY KEY ("id")
 );

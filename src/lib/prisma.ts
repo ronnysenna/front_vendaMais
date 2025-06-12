@@ -1,11 +1,37 @@
 import { PrismaClient } from "../generated/prisma/client";
-export const prisma = new PrismaClient()
 
+declare global {
+  var prisma: PrismaClient | undefined;
+}
 
-//import { PrismaClient } from "@/generated/prisma/client";
+const prismaClientSingleton = () => {
+  return new PrismaClient({
+    log: ["error"],
+    datasources: {
+      db: {
+        url: process.env.DATABASE_URL,
+      },
+    },
+  });
+};
 
-//const globalForPrisma = globalThis as unknown as { prisma: PrismaClient };
+export const prisma = globalThis.prisma ?? prismaClientSingleton();
 
-//export const prisma = globalForPrisma.prisma ?? new PrismaClient();
+if (process.env.NODE_ENV !== "production") globalThis.prisma = prisma;
 
-//if (process.env.NODE_ENV !== "production") globalForPrisma.prisma = prisma;
+// Tratamento de erros de conexão
+if (process.env.NODE_ENV !== "production") {
+  process.on("beforeExit", async () => {
+    await prisma.$disconnect();
+  });
+
+  process.on("SIGINT", async () => {
+    await prisma.$disconnect();
+    process.exit(0);
+  });
+
+  process.on("SIGTERM", async () => {
+    await prisma.$disconnect();
+    process.exit(0);
+  });
+}

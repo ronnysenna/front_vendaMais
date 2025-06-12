@@ -28,169 +28,90 @@ export default function QRCodePage() {
   const [showHistory, setShowHistory] = useState(false)
   const timerIntervalRef = useRef<NodeJS.Timeout | null>(null)
 
-  const N8N_BASE_URL = 'https://n8n.ronnysenna.com.br/webhook'
+  // Adicionado para o novo useEffect
+  const isMounted = useRef(false);
+
+  const WEBHOOK_URLS = {
+    criar: 'https://n8n.ronnysenna.com.br/webhook/criar-instancia-evolution',
+    atualizar: 'https://n8n.ronnysenna.com.br/webhook/atualizar-qr-code',
+    status: 'https://n8n.ronnysenna.com.br/webhook/verificar-status-instancia'
+  }
+
   const LOCAL_STORAGE_KEY = 'evolutionInstanceStatus'
 
-  const checkIfConnected = useCallback(async (name: string): Promise<boolean> => {
-    if (!name) return false
-    try {
-      const response = await fetch(`${N8N_BASE_URL}/verificar-status-instancia`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ instanceName: name }),
-      })
-
-      if (!response.ok) {
-        console.error("Erro ao verificar status (resposta não OK):", response.status)
-        return false
-      }
-
-      const data: QRCodeResponse = await response.json()
-
-      if (data.status === 'conectado') {
-        setIsConnected(true)
-        saveStatusToLocalStorage(name, true)
-        return true
-      }
-    } catch (err) {
-      console.error('Erro ao verificar status:', err)
-    }
-    return false
-  }, [N8N_BASE_URL])
-
-  const updateInstanceHistory = useCallback((name: string, connected: boolean) => {
-    setHistory(prev => {
-      const updatedHistory = prev.find(h => h.name === name)
-        ? prev.map(h => h.name === name
-          ? {
-            ...h,
-            lastConnected: new Date().toISOString(),
-            status: connected ? ('connected' as const) : ('disconnected' as const)
-          }
-          : h)
-        : [...prev, {
-          name,
-          lastConnected: new Date().toISOString(),
-          status: connected ? ('connected' as const) : ('disconnected' as const)
-        }]
-
-      localStorage.setItem('instanceHistory', JSON.stringify(updatedHistory))
-      return updatedHistory
-    })
-  }, [])
-
-  const saveStatusToLocalStorage = useCallback((name: string, connected: boolean) => {
-    localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify({
-      instanceName: name,
-      isConnected: connected,
-      lastConnected: new Date().toISOString()
-    }))
-    updateInstanceHistory(name, connected)
-  }, [updateInstanceHistory])
-
-  const loadStatusFromLocalStorage = useCallback(() => {
-    setError(null)
-    const storedStatus = localStorage.getItem(LOCAL_STORAGE_KEY)
-    const historyData = localStorage.getItem('instanceHistory')
-
-    if (historyData) {
-      try {
-        const parsedHistory = JSON.parse(historyData)
-        if (Array.isArray(parsedHistory)) {
-          setHistory(parsedHistory)
-        }
-      } catch (e) {
-        console.error("Erro ao carregar histórico", e)
-        localStorage.removeItem('instanceHistory')
-      }
-    }
-
-    if (storedStatus) {
-      try {
-        const { instanceName: storedName, isConnected: storedConnected } = JSON.parse(storedStatus)
-        if (storedConnected && storedName) {
-          setInstanceName(storedName)
-          setIsConnected(true)
-          setQrCodeSrc(null)
-          setTimer(null)
-          return true
-        }
-      } catch (e) {
-        console.error("Erro ao carregar status da instância", e)
-        setError("Erro ao carregar status da última sessão")
-        localStorage.removeItem(LOCAL_STORAGE_KEY)
-      }
-    }
-    return false
-  }, [])
-
-  const resetInstance = useCallback(() => {
-    if (confirm('Tem certeza que deseja desconectar esta instância?')) {
-      localStorage.removeItem(LOCAL_STORAGE_KEY)
-      updateInstanceHistory(instanceName, false)
-      setInstanceName('')
-      setQrCodeSrc(null)
-      setLoading(false)
-      setTimer(null)
-      setIsConnected(false)
-      setError(null)
-      if (timerIntervalRef.current) {
-        clearInterval(timerIntervalRef.current)
-      }
-    }
-  }, [instanceName, updateInstanceHistory])
-
-  const handleHistoryItemClick = useCallback((item: InstanceHistory) => {
-    setInstanceName(item.name)
-    void checkIfConnected(item.name)
-    setShowHistory(false)
-  }, [checkIfConnected])
-
-  const clearHistory = useCallback(() => {
-    if (confirm('Tem certeza que deseja limpar o histórico?')) {
-      setHistory([])
-      localStorage.removeItem('instanceHistory')
-    }
-  }, [])
-
-  const fetchAndDisplayQRCode = useCallback(async (name: string, isInitial: boolean = false) => {
+  const fetchAndDisplayQRCode = useCallback(async (name: string) => {
     setLoading(true)
     setQrCodeSrc(null)
     setIsConnected(false)
     setError(null)
 
     try {
-      const endpoint = isInitial
-        ? `${N8N_BASE_URL}/criar-instancia-evolution`
-        : `${N8N_BASE_URL}/atualizar-qr-code`
-
-      const response = await fetch(endpoint, {
+      // Primeiro, criar a instância
+      const response = await fetch(WEBHOOK_URLS.criar, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ instanceName: name }),
       })
 
-      if (!response.ok) {
-        const errorText = await response.text()
-        throw new Error(`Erro na resposta do servidor: ${response.status} - ${errorText || response.statusText}`)
-      }
+      let data: QRCodeResponse;
+      const contentType = response.headers.get('content-type');
 
-      const contentType = response.headers.get('content-type')
-      let imgSrc: string
-
-      if (contentType?.includes('application/json')) {
-        const data: QRCodeResponse = await response.json()
-        if (data.qrCodeBase64) {
-          imgSrc = `data:image/png;base64,${data.qrCodeBase64}`
+      try {
+        if (contentType?.includes('image/png')) {
+          // Se for uma imagem PNG, converte o buffer para base64
+          const arrayBuffer = await response.arrayBuffer();
+          const base64 = Buffer.from(arrayBuffer).toString('base64');
+          data = { qrCodeBase64: `data:image/png;base64,${base64}` };
         } else {
-          throw new Error('QR Code Base64 não encontrado na resposta.')
+          // Se não for imagem, tenta processar como JSON ou base64
+          const responseText = await response.text();
+
+          // Tenta detectar se já é base64
+          if (responseText.match(/^data:image\/(png|jpeg|jpg|gif);base64,/)) {
+            data = { qrCodeBase64: responseText };
+          } else {
+            try {
+              data = JSON.parse(responseText);
+            } catch {
+              throw new Error('Formato de resposta inválido');
+            }
+          }
         }
-      } else {
-        const blob = await response.blob()
-        imgSrc = URL.createObjectURL(blob)
+      } catch (parseError: unknown) {
+        const errorMessage = parseError instanceof Error ? parseError.message : 'Erro desconhecido';
+        throw new Error(`Erro ao processar resposta do servidor: ${errorMessage}`);
       }
 
-      setQrCodeSrc(imgSrc)
+      if (!response.ok) {
+        throw new Error(`Erro na resposta do servidor: ${response.status} - ${data.error || response.statusText}`);
+      }
+
+      if (data.error) {
+        throw new Error(data.error);
+      }
+
+      if (data.qrcode || data.qrCodeBase64) {
+        const qrSource = data.qrcode || data.qrCodeBase64;
+        if (!qrSource) {
+          throw new Error('QR Code recebido é inválido');
+        }
+
+        // Garante que a string do QR code é uma URL válida ou base64
+        if (!qrSource.startsWith('data:image/') && !qrSource.startsWith('http')) {
+          // Se for apenas base64, adiciona o prefixo necessário
+          setQrCodeSrc(`data:image/png;base64,${qrSource}`);
+        } else {
+          setQrCodeSrc(qrSource);
+        }
+
+        startStatusCheck(name);
+      } else if (data.status === 'connected') {
+        setIsConnected(true)
+        updateInstanceHistory(name, true)
+        resetInstance()
+      } else {
+        throw new Error('Resposta inválida do servidor')
+      }
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : String(error)
       console.error('Erro ao gerar QR code:', error)
@@ -199,338 +120,374 @@ export default function QRCodePage() {
     } finally {
       setLoading(false)
     }
-  }, [N8N_BASE_URL, resetInstance])
+  }, [])
 
-  const startTimer = useCallback(() => {
-    if (timerIntervalRef.current) {
-      clearInterval(timerIntervalRef.current)
-    }
-    setTimer(10)
-
-    timerIntervalRef.current = setInterval(() => {
-      setTimer(prevTime => {
-        if (prevTime === null) return null
-        if (prevTime <= 1) {
-          if (instanceName) {
-            void checkIfConnected(instanceName).then(connected => {
-              if (!connected) {
-                void fetchAndDisplayQRCode(instanceName)
-                setTimer(10)
-              } else {
-                if (timerIntervalRef.current) {
-                  clearInterval(timerIntervalRef.current)
-                }
-                setTimer(null)
-              }
-            })
-          }
-          return 0
-        }
-        return prevTime - 1
-      })
-    }, 1000)
-  }, [instanceName, checkIfConnected, fetchAndDisplayQRCode])
-
-  const handleSubmit = useCallback(async (e: React.FormEvent) => {
-    e.preventDefault()
-    if (!instanceName.trim()) return
-
-    setError(null)
-    setLoading(true)
-
-    try {
-      const response = await fetch(`${N8N_BASE_URL}/gerar-qrcode`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ instanceName: instanceName.trim() }),
-      })
-
-      if (!response.ok) {
-        throw new Error('Erro ao gerar QR Code')
-      }
-
-      const data: QRCodeResponse = await response.json()
-      if (data.qrcode) {
-        setQrCodeSrc(data.qrcode)
-        startTimer()
-      } else if (data.error) {
-        throw new Error(data.error)
-      }
-    } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : 'Erro ao gerar QR Code'
-      console.error('Erro:', error)
-      setError(errorMessage)
-    } finally {
-      setLoading(false)
-    }
-  }, [instanceName, N8N_BASE_URL, startTimer])
-
-  const handleCreateInstance = async () => {
-    if (!instanceName.trim()) return
-
-    setLoading(true)
-    setError(null)
-    setQrCodeSrc(null)
-
-    try {
-      const response = await fetch(`${N8N_BASE_URL}/criar-instancia`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ instanceName }),
-      })
-
-      if (!response.ok) {
-        throw new Error('Erro ao criar instância')
-      }
-
-      const data: QRCodeResponse = await response.json()
-
-      if (data.error) {
-        throw new Error(data.error)
-      }
-
-      if (data.qrCodeBase64) {
-        setQrCodeSrc(`data:image/png;base64,${data.qrCodeBase64}`)
-        startConnectionCheck()
-      }
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Erro ao criar instância')
-    } finally {
-      setLoading(false)
-    }
-  }
-
-  const handleDisconnect = async () => {
-    if (!instanceName) return
-
-    try {
-      setLoading(true)
-      setError(null)
-
-      const response = await fetch(`${N8N_BASE_URL}/deletar-instancia`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ instanceName }),
-      })
-
-      if (!response.ok) {
-        throw new Error('Erro ao desconectar instância')
-      }
-
-      setIsConnected(false)
-      setQrCodeSrc(null)
-      setInstanceName('')
-      saveStatusToLocalStorage(instanceName, false)
-      stopConnectionCheck()
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Erro ao desconectar instância')
-    } finally {
-      setLoading(false)
-    }
-  }
-
-  const startConnectionCheck = useCallback(() => {
-    if (timerIntervalRef.current) {
-      clearInterval(timerIntervalRef.current)
-    }
-
-    let timeLeft = 30
-    setTimer(timeLeft)
-
-    timerIntervalRef.current = setInterval(async () => {
-      if (timeLeft <= 0) {
-        if (timerIntervalRef.current) {
-          clearInterval(timerIntervalRef.current)
-        }
-        const isConnected = await checkIfConnected(instanceName)
-        if (!isConnected) {
-          setQrCodeSrc(null)
-          handleCreateInstance()
-        }
-        return
-      }
-      setTimer(--timeLeft)
-    }, 1000)
-  }, [checkIfConnected, handleCreateInstance, instanceName])
-
-  const stopConnectionCheck = useCallback(() => {
+  const resetInstance = useCallback(() => {
     if (timerIntervalRef.current) {
       clearInterval(timerIntervalRef.current)
       timerIntervalRef.current = null
     }
     setTimer(null)
+    setQrCodeSrc(null)
+    setIsConnected(false)
+    setError(null)
   }, [])
 
-  useEffect(() => {
-    loadStatusFromLocalStorage()
+  const startStatusCheck = useCallback((name: string) => {
+    if (timerIntervalRef.current) {
+      clearInterval(timerIntervalRef.current)
+    }
+
+    const checkStatus = async () => {
+      try {
+        // Primeiro verifica o status
+        const response = await fetch(WEBHOOK_URLS.status, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ instanceName: name }),
+        });
+
+        if (!response.ok) {
+          throw new Error(`Erro ao verificar status: ${response.status}`);
+        }
+
+        // Tenta ler o corpo da resposta primeiro como texto
+        const responseText = await response.text();
+        console.log('Resposta bruta do status:', responseText);
+
+        // Se a resposta estiver vazia, considera como não conectado
+        if (!responseText || !responseText.trim()) {
+          console.log('Resposta de status vazia');
+          return;
+        }
+
+        let statusData;
+        try {
+          statusData = JSON.parse(responseText);
+          console.log('Dados de status recebidos:', statusData); // Log para ver o objeto statusData completo
+        } catch (e) {
+          console.error('Erro ao fazer parse do status:', e);
+          return;
+        }
+
+        // Se estiver conectado
+        if (statusData.status && statusData.status.trim().toLowerCase() === 'conectado') {
+          console.log('WhatsApp conectado! Exibindo imagem de confirmação.');
+          setIsConnected(true);
+          setQrCodeSrc('/images/conectado.png'); // <--- Define a imagem de conectado
+          updateInstanceHistory(name, true);
+
+          // Para o loop de verificação
+          if (timerIntervalRef.current) {
+            clearInterval(timerIntervalRef.current);
+            timerIntervalRef.current = null;
+          }
+          return;
+        }
+
+        console.log('Status diferente de connected. Status atual:', statusData.status, 'Dados completos de status:', statusData);
+
+        // Se chegou aqui, não está conectado. Tenta atualizar o QR code
+        console.log('Atualizando QR code...');
+        const updateResponse = await fetch(WEBHOOK_URLS.atualizar, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ instanceName: name }),
+        });
+
+        if (!updateResponse.ok) {
+          throw new Error(`Erro ao atualizar QR code: ${updateResponse.status}`);
+        }
+
+        const contentType = updateResponse.headers.get('content-type');
+        console.log('Content-Type da resposta de atualização:', contentType);
+
+        // Se for uma imagem PNG
+        if (contentType?.includes('image/png')) {
+          const arrayBuffer = await updateResponse.arrayBuffer();
+          const base64 = Buffer.from(arrayBuffer).toString('base64');
+          setQrCodeSrc(`data:image/png;base64,${base64}`);
+          console.log('QR code atualizado (imagem PNG)');
+          return;
+        }
+
+        // Se não for imagem, tenta ler como texto
+        const updateText = await updateResponse.text();
+        console.log('Resposta de atualização:', updateText);
+
+        // Se a resposta estiver vazia, mantém o QR code atual
+        if (!updateText || !updateText.trim()) {
+          console.log('Resposta de atualização vazia');
+          return;
+        }
+
+        // Se já for um base64 com prefixo
+        if (updateText.match(/^data:image\/(png|jpeg|jpg|gif);base64,/)) {
+          setQrCodeSrc(updateText);
+          console.log('QR code atualizado (base64 direto)');
+          return;
+        }
+
+        try {
+          // Tenta fazer parse como JSON
+          const updateData = JSON.parse(updateText);
+          const qrSource = updateData.qrcode || updateData.qrCodeBase64;
+
+          if (qrSource) {
+            if (!qrSource.startsWith('data:image/') && !qrSource.startsWith('http')) {
+              setQrCodeSrc(`data:image/png;base64,${qrSource}`);
+              console.log('QR code atualizado (base64 do JSON)');
+            } else {
+              setQrCodeSrc(qrSource);
+              console.log('QR code atualizado (URL ou base64 do JSON)');
+            }
+          }
+        } catch (error) {
+          console.error('Erro ao processar resposta de atualização:', error);
+        }
+      } catch (error) {
+        console.error('Erro na verificação de status:', error);
+      }
+    };
+
+    // Inicia o loop de verificação
+    checkStatus(); // Primeira verificação imediata
+    timerIntervalRef.current = setInterval(checkStatus, 5000);
+
     return () => {
       if (timerIntervalRef.current) {
-        clearInterval(timerIntervalRef.current)
+        clearInterval(timerIntervalRef.current);
       }
-    }
-  }, [loadStatusFromLocalStorage])
+    };
+  }, [])
+
+  const updateInstanceHistory = useCallback((name: string, connected: boolean) => {
+    const currentDate = new Date().toISOString()
+    setHistory(prev => {
+      const newHistory = prev.filter(h => h.name !== name)
+      const newEntry: InstanceHistory = {
+        name,
+        lastConnected: currentDate,
+        status: connected ? 'connected' : 'disconnected'
+      }
+      return [newEntry, ...newHistory].slice(0, 5)
+    })
+  }, [])
+
+  // Efeito para carregar o histórico e verificar a última instância conectada ao montar
+  useEffect(() => {
+    const initializePage = async () => {
+      // 1. Carregar histórico do localStorage
+      const savedHistoryString = localStorage.getItem(LOCAL_STORAGE_KEY);
+      let initialHistory: InstanceHistory[] = [];
+      if (savedHistoryString) {
+        try {
+          initialHistory = JSON.parse(savedHistoryString);
+          setHistory(initialHistory); // Atualiza o estado do histórico
+        } catch (e) {
+          console.error('Erro ao carregar histórico do localStorage:', e);
+        }
+      }
+
+      // 2. Se houver histórico, iterar e verificar o status de cada instância até encontrar uma conectada
+      if (initialHistory.length > 0) {
+        setLoading(true); // Feedback visual geral para a verificação inicial
+        setError(null);
+        let foundConnectedInstance = false;
+
+        for (const instanceEntry of initialHistory) {
+          if (!instanceEntry.name || typeof instanceEntry.name !== 'string') {
+            console.warn('Entrada de histórico inválida (sem nome):', instanceEntry);
+            continue; // Pula entradas inválidas
+          }
+
+          console.log(`Verificando status inicial para: ${instanceEntry.name}`);
+          try {
+            const response = await fetch(WEBHOOK_URLS.status, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ instanceName: instanceEntry.name }),
+            });
+
+            if (response.ok) {
+              const statusText = await response.text();
+              if (statusText && statusText.trim()) {
+                const statusData = JSON.parse(statusText);
+                if (statusData.status && statusData.status.trim().toLowerCase() === 'conectado') {
+                  console.log(`Instância '${instanceEntry.name}' confirmada como conectada.`);
+                  setInstanceName(instanceEntry.name); // Preenche o nome da instância
+                  setIsConnected(true);                 // Define como conectada
+                  setQrCodeSrc('/images/conectado.png'); // Mostra a imagem de conectado
+                  foundConnectedInstance = true;
+                  break; // Para a iteração, pois já encontramos uma conectada
+                } else {
+                  console.log(`Instância '${instanceEntry.name}' não está conectada (status: ${statusData.status}).`);
+                }
+              } else {
+                console.log(`Resposta de status vazia para '${instanceEntry.name}'.`);
+              }
+            } else {
+              console.warn(`Falha ao verificar status inicial para '${instanceEntry.name}': ${response.status}`);
+            }
+          } catch (e) {
+            console.error(`Erro na verificação de status inicial para '${instanceEntry.name}':`, e);
+          }
+        }
+        // Se nenhuma instância conectada foi encontrada no histórico, garantir que a UI esteja limpa.
+        if (!foundConnectedInstance) {
+          // O resetInstance() pode ser muito agressivo aqui se o usuário já digitou algo.
+          // Apenas garantimos que isConnected e qrCodeSrc estejam no estado "não conectado".
+          // instanceName permanecerá como está (se o usuário digitou algo) ou '' (inicial).
+          setIsConnected(false);
+          setQrCodeSrc(null); // Limpa qualquer QR code ou imagem de conectado anterior
+        }
+        setLoading(false);
+      }
+    };
+
+    initializePage();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []); // Array de dependências vazio para executar apenas na montagem
 
   useEffect(() => {
-    if (isConnected) {
-      stopConnectionCheck()
+    // Salva o histórico no localStorage sempre que ele mudar
+    // Apenas executa se não for a montagem inicial para evitar sobrescrever o estado inicial antes de ser totalmente processado
+    if (isMounted.current) {
+      localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(history));
+    } else {
+      isMounted.current = true;
     }
-  }, [isConnected, stopConnectionCheck])
+  }, [history]);
 
   return (
-    <div className="container-fluid py-4">
-      <div className="row justify-content-center">
-        <div className="col-12 col-md-8 col-lg-6">
+    <div className="container">
+      <div className="card mb-4">
+        <div className="card-body">
+          <h1 className="display-6 fw-bold mb-4">Gerador de QR Code</h1>
+
           {error && (
-            <div className="profile-feedback error d-flex align-items-center gap-2">
-              <AlertCircle size={20} />
+            <div className="alert alert-danger d-flex align-items-center mb-4">
+              <AlertCircle className="me-2" />
               {error}
             </div>
           )}
 
-          <div className="profile-card">
-            <div className="card-body p-4">
-              <div className="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 mb-4">
-                <div>
-                  <h1 className="h3 mb-1 fw-bold gradient-number">WhatsApp Connect</h1>
-                  <p className="text-muted mb-0">Conecte sua instância do WhatsApp</p>
-                </div>
-                <button
-                  type="button"
-                  className="btn btn-outline-primary d-flex align-items-center justify-content-center gap-2 hover-scale"
-                  onClick={() => setShowHistory(!showHistory)}
-                >
-                  <History size={18} />
-                  <span>{showHistory ? 'Voltar' : 'Histórico'}</span>
-                </button>
-              </div>
-
-              {showHistory ? (
-                <div className="animate-slide-in">
-                  <div className="card-status-info p-3 rounded-3">
-                    <h5 className="mb-3 d-flex align-items-center gap-2">
-                      <History size={18} />
-                      Histórico de Conexões
-                    </h5>
-                    {history.length === 0 ? (
-                      <p className="text-muted mb-0">Nenhuma conexão registrada.</p>
-                    ) : (
-                      <div className="table-responsive">
-                        <table className="table table-hover mb-0">
-                          <thead>
-                            <tr>
-                              <th>Nome</th>
-                              <th>Última Conexão</th>
-                              <th>Status</th>
-                            </tr>
-                          </thead>
-                          <tbody>
-                            {history.map((instance) => (
-                              <tr key={instance.name}>
-                                <td>{instance.name}</td>
-                                <td>{new Date(instance.lastConnected).toLocaleString()}</td>
-                                <td>
-                                  <span className={`badge bg-${instance.status === 'connected' ? 'success' : 'danger'}`}>
-                                    {instance.status === 'connected' ? 'Conectado' : 'Desconectado'}
-                                  </span>
-                                </td>
-                              </tr>
-                            ))}
-                          </tbody>
-                        </table>
-                      </div>
-                    )}
-                  </div>
-                </div>
-              ) : (
-                <div className="animate-slide-in">
-                  <div className="mb-4">
-                    <div className="profile-form-group">
-                      <label className="form-label">Nome da Instância</label>
-                      <div className="input-group">
-                        <input
-                          type="text"
-                          className="form-control profile-form-control"
-                          placeholder="Digite o nome da instância"
-                          value={instanceName}
-                          onChange={(e) => setInstanceName(e.target.value)}
-                          disabled={isConnected || loading}
-                        />
-                        {(isConnected || loading) && (
-                          <button
-                            className="btn btn-outline-danger hover-scale"
-                            type="button"
-                            onClick={handleDisconnect}
-                          >
-                            <Trash2 size={18} />
-                          </button>
-                        )}
-                      </div>
-                    </div>
-
-                    {!isConnected && !loading && (
-                      <button
-                        className="btn btn-primary w-100 d-flex align-items-center justify-content-center gap-2 py-2 hover-scale"
-                        onClick={handleCreateInstance}
-                        disabled={!instanceName.trim()}
-                      >
-                        <QrCodeIcon size={18} />
-                        Gerar QR Code
-                      </button>
-                    )}
-                  </div>
-
-                  {loading && (
-                    <div className="text-center p-4">
-                      <div className="spinner-border text-primary mb-2" role="status">
-                        <span className="visually-hidden">Carregando...</span>
-                      </div>
-                      <p className="text-muted mb-0">
-                        {timer !== null ? `Reconectando em ${timer}s...` : 'Gerando QR Code...'}
-                      </p>
-                    </div>
-                  )}
-
-                  {isConnected && (
-                    <div className="card-status-success p-4 rounded-4 text-center animate-slide-in">
-                      <div className="icon-glass rounded-circle p-3 d-inline-flex mb-3">
-                        <Image
-                          src="/images/conectado.png"
-                          alt="Conectado"
-                          width={48}
-                          height={48}
-                        />
-                      </div>
-                      <h4 className="gradient-number mb-2">WhatsApp Conectado!</h4>
-                      <p className="text-muted mb-0">
-                        Sua instância está ativa e pronta para uso.
-                      </p>
-                    </div>
-                  )}
-
-                  {qrCodeSrc && !isConnected && !loading && (
-                    <div className="text-center p-4 animate-fade-in">
-                      <div className="qr-code-wrapper mb-3">
-                        <Image
-                          src={qrCodeSrc}
-                          alt="QR Code"
-                          width={256}
-                          height={256}
-                          className="img-fluid rounded-4"
-                        />
-                      </div>
-                      <p className="text-muted mb-0">
-                        Escaneie o QR Code com seu WhatsApp
-                      </p>
-                    </div>
-                  )}
-                </div>
-              )}
+          {isConnected && (
+            <div className="alert alert-success d-flex align-items-center mb-4">
+              <span className="me-2">✓</span>
+              WhatsApp conectado com sucesso!
             </div>
+          )}
+
+          <div className="mb-4">
+            <label className="form-label">
+              Nome da Instância
+            </label>
+            <input
+              type="text"
+              value={instanceName}
+              onChange={(e) => setInstanceName(e.target.value)}
+              className="form-control product-form-input"
+              placeholder="Digite o nome da instância"
+            />
           </div>
+
+          <div className="d-flex gap-3">
+            <button
+              onClick={() => fetchAndDisplayQRCode(instanceName)}
+              className="btn btn-primary flex-grow-1 d-flex align-items-center justify-content-center gap-2 py-2 hover-scale"
+              disabled={loading || !instanceName}
+            >
+              {loading ? (
+                <>
+                  <div className="spinner-border spinner-border-sm" role="status">
+                    <span className="visually-hidden">Carregando...</span>
+                  </div>
+                  <span>Gerando...</span>
+                </>
+              ) : (
+                <>
+                  <QrCodeIcon size={18} />
+                  <span>Gerar QR Code</span>
+                </>
+              )}
+            </button>
+
+            <button
+              onClick={resetInstance}
+              className="btn btn-light flex-grow-1 d-flex align-items-center justify-content-center gap-2 py-2 hover-scale"
+            >
+              <Trash2 size={18} />
+              <span>Limpar</span>
+            </button>
+          </div>
+
+          {/*
+            Renderiza a imagem (QR Code ou imagem de "Conectado") se qrCodeSrc existir.
+            A imagem correta é determinada pelo valor de qrCodeSrc,
+            que é atualizado no callback de startStatusCheck.
+          */}
+          {qrCodeSrc && (
+            <div className={`mt-4 qr-code-wrapper text-center p-4 ${isConnected ? 'connected' : ''}`}>
+              <Image
+                key={isConnected ? "connected-image" : qrCodeSrc} // Chave diferente para forçar re-renderização
+                src={qrCodeSrc}
+                alt={isConnected ? "WhatsApp Conectado" : "QR Code"}
+                width={256}
+                height={256}
+                className="img-fluid rounded animate-slide-in"
+                priority
+              />
+            </div>
+          )}
         </div>
       </div>
+
+      {history.length > 0 && (
+        <div className="card animate-slide-in">
+          <div className="card-body">
+            <button
+              onClick={() => setShowHistory(!showHistory)}
+              className="btn btn-success w-100 d-flex align-items-center justify-content-center gap-2 py-2 hover-scale mb-3"
+            >
+              <History size={18} />
+              {showHistory ? 'Ocultar Histórico' : 'Mostrar Histórico'}
+            </button>
+
+            {showHistory && (
+              <div className="animate-fade-in">
+                <h5 className="gradient-number mb-3">Histórico de Conexões</h5>
+                <div className="table-responsive">
+                  <table className="table table-hover mb-0">
+                    <thead>
+                      <tr>
+                        <th>Nome da Instância</th>
+                        <th>Data</th>
+                        <th className="text-center">Status</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {history.map((item, index) => (
+                        <tr key={index}>
+                          <td>{item.name}</td>
+                          <td>{new Date(item.lastConnected).toLocaleString()}</td>
+                          <td className="text-center">
+                            <span
+                              className={`badge ${item.status === 'connected' ? 'bg-success' : 'bg-danger'}`}
+                            >
+                              {item.status === 'connected' ? 'Conectado' : 'Desconectado'}
+                            </span>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
     </div>
   )
 }
