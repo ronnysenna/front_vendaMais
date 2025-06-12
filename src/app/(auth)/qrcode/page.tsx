@@ -54,7 +54,8 @@ export default function QRCodePage() {
   const [loadingQr, setLoadingQr] = useState(false) // Renomeado de 'loading'
   const [timer, setTimer] = useState<number | null>(null)
   const [isConnected, setIsConnected] = useState(false)
-  const [error, setError] = useState<string | null>(null)
+  const [error, setError] = useState<string | null>(null) // Pode ser refatorado/removido em favor de userMessage
+  const [userMessage, setUserMessage] = useState<{ type: 'success' | 'error' | 'info'; message: string } | null>(null); // Novo estado para mensagens do usuário
   const [history, setHistory] = useState<InstanceHistory[]>([])
   const [showHistory, setShowHistory] = useState(false)
   const timerIntervalRef = useRef<NodeJS.Timeout | null>(null)
@@ -160,6 +161,7 @@ export default function QRCodePage() {
     console.log(`[handleDisconnect] Iniciando desconexão para: ${nameToDisconnect}`);
     setLoadingDisconnectInstanceName(nameToDisconnect);
     setError(null); // Limpa erros anteriores
+    setUserMessage(null); // Limpa mensagens anteriores
     try {
       console.log(`[handleDisconnect] Chamando webhook: ${WEBHOOK_URLS.desconectar}`);
       const response = await fetch(WEBHOOK_URLS.desconectar, {
@@ -187,6 +189,7 @@ export default function QRCodePage() {
 
       // Sucesso na desconexão
       console.log('[handleDisconnect] Atualizando UI para desconectado.');
+      setUserMessage({ type: 'success', message: `Instância ${nameToDisconnect} desconectada com sucesso.` });
       setAllInstances(prev =>
         prev.map(inst =>
           inst.name === nameToDisconnect ? { ...inst, status: 'close' } : inst
@@ -207,7 +210,8 @@ export default function QRCodePage() {
     } catch (disconnectError) {
       const errorMessage = disconnectError instanceof Error ? disconnectError.message : String(disconnectError);
       console.error(`[handleDisconnect] Erro ao desconectar ${nameToDisconnect}:`, disconnectError);
-      setError(`Falha ao desconectar ${nameToDisconnect}: ${errorMessage.substring(0, 200)}`);
+      // setError(`Falha ao desconectar ${nameToDisconnect}: ${errorMessage.substring(0, 200)}`); // Substituído por setUserMessage
+      setUserMessage({ type: 'error', message: `Falha ao desconectar ${nameToDisconnect}: ${errorMessage.substring(0, 200)}` });
     } finally {
       console.log(`[handleDisconnect] Finalizando desconexão para: ${nameToDisconnect}`);
       setLoadingDisconnectInstanceName(null);
@@ -233,6 +237,7 @@ export default function QRCodePage() {
       clearInterval(timerIntervalRef.current)
     }
     setCurrentOperationInstanceName(name); // Garante que a instância sendo verificada é a "em operação"
+    // setUserMessage(null); // Limpa mensagens ao iniciar uma nova verificação para uma instância
 
     const checkStatus = async () => {
       // Se o nome da instância em verificação não for mais o nome da instância em operação, para o polling.
@@ -256,7 +261,8 @@ export default function QRCodePage() {
           // Se o status for 404, a instância pode não existir mais ou estar com problemas
           if (response.status === 404) {
             console.warn(`Instância ${name} não encontrada (404) ao verificar status.`);
-            setError(`Instância ${name} não encontrada. Pode ter sido removida ou está com erro.`);
+            // setError(`Instância ${name} não encontrada. Pode ter sido removida ou está com erro.`); // Substituído
+            setUserMessage({ type: 'error', message: `Instância ${name} não encontrada (404). Pode ter sido removida ou está com erro.` });
             setAllInstances(prev => prev.map(inst => inst.name === name ? { ...inst, status: 'error' } : inst));
             updateInstanceHistory(name, false, 'error');
             if (timerIntervalRef.current) clearInterval(timerIntervalRef.current);
@@ -300,6 +306,7 @@ export default function QRCodePage() {
 
           if (currentStatus === 'conectado') {
             console.log(`Instância '${name}' conectada!`);
+            setUserMessage({ type: 'success', message: `Instância ${name} conectada com sucesso!` });
             setIsConnected(true);
             setQrCodeSrc('/images/conectado.png');
             updateInstanceHistory(name, true);
@@ -368,13 +375,15 @@ export default function QRCodePage() {
         if (newQrSrc) {
           setQrCodeSrc(newQrSrc);
           setIsConnected(false); // Garante que não está marcado como conectado se recebeu novo QR
-          console.log(`QR code para '${name}' atualizado.`);
-          // Se recebeu um QR, o status da instância em allInstances deve ser 'open' (pronta para escanear)
+          setUserMessage({ type: 'info', message: `QR Code para ${name} atualizado. Escaneie para conectar.` });
+          console.log(`QR code para \'${name}\' atualizado.`);
+          // Se recebeu um QR, o status da instância em allInstances deve ser \'open\' (pronta para escanear)
           setAllInstances(prev => prev.map(inst => inst.name === name ? { ...inst, status: 'open' } : inst));
           updateInstanceHistory(name, false);
         } else if (qrUpdateData.status === 'conectado') { // Caso raro, mas o endpoint de atualizar pode conectar
           setIsConnected(true);
           setQrCodeSrc('/images/conectado.png');
+          setUserMessage({ type: 'success', message: `Instância ${name} conectada através da atualização.` });
           updateInstanceHistory(name, true);
           setAllInstances(prev => prev.map(inst => inst.name === name ? { ...inst, status: 'conectado' } : inst));
           if (timerIntervalRef.current) clearInterval(timerIntervalRef.current);
@@ -392,7 +401,8 @@ export default function QRCodePage() {
         const errorMessage = statusError instanceof Error ? statusError.message : String(statusError);
         console.error(`Erro no ciclo de verificação de status/atualização de QR para ${name}:`, statusError);
         //setError(`Erro ao verificar/atualizar ${name}: ${errorMessage.substring(0,100)}`);
-        // Não para o polling por erros de rede, a menos que seja um 404 ou outro erro que defina status 'error'
+        // Não mostra mensagem de erro para cada falha de polling, apenas para erros terminais (como 404)
+        // setUserMessage({ type: \'error\', message: `Erro no polling para ${name}: ${errorMessage.substring(0,100)}` });
         const currentInstance = allInstances.find(inst => inst.name === name);
         if (currentInstance && currentInstance.status !== 'error') {
           // Poderia definir um status temporário de 'unknown' ou 'connecting' se o erro for de rede
@@ -443,13 +453,17 @@ export default function QRCodePage() {
 
   const initiateConnectionProcess = useCallback(async (nameToProcess: string) => {
     if (!nameToProcess.trim()) {
-      setError("O nome da instância não pode estar vazio.");
+      // setError("O nome da instância não pode estar vazio."); // Substituído
+      setUserMessage({
+        type: 'error', message: 'O nome da instância não pode estar vazio.'
+      }); // Corrigido aqui
       return;
     }
     setLoadingQr(true);
     setQrCodeSrc(null);
     setIsConnected(false);
-    setError(null);
+    setError(null); // Limpa erro legado
+    setUserMessage(null); // Limpa mensagens
     setCurrentOperationInstanceName(nameToProcess);
     setInstanceName(nameToProcess);
     setLastActiveInstanceName(nameToProcess);
@@ -532,8 +546,9 @@ export default function QRCodePage() {
       if (receivedQrSrc) {
         setQrCodeSrc(receivedQrSrc);
         setIsConnected(false);
+        setUserMessage({ type: 'info', message: `QR Code para ${nameToProcess} gerado/atualizado. Escaneie para conectar.` });
         startStatusCheck(nameToProcess);
-        // Atualiza status em allInstances para 'open' pois um QR foi gerado/atualizado
+        // Atualiza status em allInstances para \'open\' pois um QR foi gerado/atualizado
         setAllInstances(prev => {
           const existing = prev.find(i => i.name === nameToProcess);
           if (existing) {
@@ -546,6 +561,7 @@ export default function QRCodePage() {
       } else if (data.status === 'conectado' || (data.instance && data.instance.status === 'conectado')) {
         setIsConnected(true);
         setQrCodeSrc('/images/conectado.png');
+        setUserMessage({ type: 'success', message: `Instância ${nameToProcess} conectada com sucesso!` });
         updateInstanceHistory(nameToProcess, true);
         setAllInstances(prev => {
           const existing = prev.find(i => i.name === nameToProcess);
@@ -568,22 +584,17 @@ export default function QRCodePage() {
         }
         // Não inicia o status check aqui se não recebeu QR, pois pode não haver nada para verificar ainda.
         // O usuário pode precisar tentar novamente.
-        // setError('Não foi possível obter o QR Code. Tente novamente.'); // Removido para não ser muito agressivo
-        console.warn("Resposta inválida do servidor ou falha ao obter QR, status pode ser 'close' ou 'error'. Resposta:", data);
-      }
-
-      if (isCreatingNewInstance) {
-        // Após criar, atualiza a lista de instâncias para garantir que a nova apareça.
-        // Se a criação já adicionou à lista (ex: conectou direto ou retornou QR),
-        // o fetchAllInstances vai apenas atualizar os status de outras.
-        await fetchAllInstances();
+        // setError(\'Não foi possível obter o QR Code. Tente novamente.\'); // Removido para não ser muito agressivo
+        // setUserMessage({ type: \'info\', message: `Tentando obter QR Code para ${nameToProcess}...` }); // Mensagem mais neutra
+        console.warn("Resposta inválida do servidor ou falha ao obter QR, status pode ser \'close\' ou \'error\'. Resposta:", data);
       }
 
     } catch (opError) {
       const errorMessage = opError instanceof Error ? opError.message : String(opError);
       console.error(`Erro ao iniciar processo para ${nameToProcess}:`, opError);
-      setError(errorMessage.substring(0, 300));
-      // Se deu erro, o status da instância pode ser 'error'
+      // setError(errorMessage.substring(0, 300)); // Substituído
+      setUserMessage({ type: 'error', message: `Erro ao processar ${nameToProcess}: ${errorMessage.substring(0, 300)}` });
+      // Se deu erro, o status da instância pode ser \'error\'
       setAllInstances(prev => {
         const existing = prev.find(i => i.name === nameToProcess);
         if (existing) {
@@ -738,6 +749,16 @@ export default function QRCodePage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [fetchAllInstances]); // fetchAllInstances é useCallback
 
+  // Efeito para limpar mensagens de usuário após 5 segundos
+  useEffect(() => {
+    if (userMessage) {
+      const messageTimer = setTimeout(() => {
+        setUserMessage(null);
+      }, 5000); // Mensagem desaparece após 5 segundos
+      return () => clearTimeout(messageTimer);
+    }
+  }, [userMessage]);
+
   // Salvar histórico no localStorage
   useEffect(() => {
     if (isMounted.current) { // Evita salvar na montagem inicial antes de carregar
@@ -781,21 +802,25 @@ export default function QRCodePage() {
         <div className="card-body">
           <h1 className="display-6 fw-bold mb-4">Gerenciador de Instâncias WhatsApp</h1>
 
-          {error && (
+          {error && ( // Mantido por enquanto, para erros não cobertos por userMessage ou para depuração
             <div className="alert alert-danger d-flex align-items-center mb-4" role="alert">
               <AlertCircle className="me-2 flex-shrink-0" />
               <small>{error}</small>
             </div>
           )}
 
-          {isConnected && instanceName === currentOperationInstanceName && qrCodeSrc === '/images/conectado.png' && (
-            <div className="alert alert-success d-flex align-items-center mb-4" role="alert">
-              {STATUS_DISPLAY_INFO.conectado.icon &&
-                React.createElement(STATUS_DISPLAY_INFO.conectado.icon, { className: "me-2 flex-shrink-0", size: 20 })
-              }
-              Instância <strong>{instanceName}</strong> conectada com sucesso!
+          {userMessage && (
+            <div className={`alert alert-${userMessage.type === 'error' ? 'danger' : userMessage.type === 'success' ? 'success' : 'info'} d-flex align-items-center mb-4 alert-dismissible fade show`} role="alert">
+              {userMessage.type === 'success' && <CheckCircle2 className="me-2 flex-shrink-0" />}
+              {userMessage.type === 'error' && <AlertTriangle className="me-2 flex-shrink-0" />}
+              {userMessage.type === 'info' && <Info className="me-2 flex-shrink-0" />}
+              <small>{userMessage.message}</small>
+              <button type="button" className="btn-close" onClick={() => setUserMessage(null)} aria-label="Close"></button>
             </div>
           )}
+
+          {/* Removido o alerta de conectado específico, pois userMessage cobrirá isso */}
+          {/* {isConnected && instanceName === currentOperationInstanceName && qrCodeSrc === '/images/conectado.png' && ( ... )} */}
 
           <div className="mb-3"> {/* Reduzido mb-4 para mb-3 */}
             <label htmlFor="instanceNameInput" className="form-label">
