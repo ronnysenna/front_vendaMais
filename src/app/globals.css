@@ -866,3 +866,69 @@
   color: var(--brand-primary);
   transform: translateX(-3px);
 }
+
+/* Adiciona animação de giro para o ícone de refresh */
+.animate-spin {
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* Estilos para a tabela, se necessário, ou use classes Bootstrap */
+.table {
+  /* Exemplo de estilo, ajuste conforme necessário */
+  width: 100%;
+  margin-bottom: 1rem;
+  color: #212529;
+  border-collapse: collapse;
+}
+
+.table th,
+.table td {
+  padding: 0.75rem;
+  vertical-align: top;
+  border-top: 1px solid #dee2e6;
+}
+
+.table thead th {
+  vertical-align: bottom;
+  border-bottom: 2px solid #dee2e6;
+}
+
+.table-hover tbody tr:hover {
+  color: #212529;
+  background-color: rgba(0, 0, 0, 0.075);
+}
+
+.table-sm th,
+.table-sm td {
+  padding: 0.3rem;
+}
+
+.badge {
+  display: inline-block;
+  padding: 0.35em 0.65em;
+  font-size: 0.75em;
+  font-weight: 700;
+  line-height: 1;
+  color: #fff;
+  text-align: center;
+  white-space: nowrap;
+  vertical-align: baseline;
+  border-radius: 0.25rem;
+}
+
+.bg-success {
+  background-color: #198754 !important; /* Cor verde do Bootstrap para sucesso */
+}
+
+.bg-danger {
+  background-color: #dc3545 !important; /* Cor vermelha do Bootstrap para perigo/desconectado */
+}
