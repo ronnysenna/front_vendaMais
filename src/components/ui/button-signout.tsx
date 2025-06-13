@@ -8,12 +8,28 @@ export function ButtonSignOut() {
   const router = useRouter()
 
   async function signOut() {
-    await authClient.signOut({
-      fetchOptions: {
-        onSuccess: () => router.replace("/"),
-        onError: (err) => console.error("Erro ao deslogar:", err)
+    try {
+      // Fazendo um logout direto com fetch para garantir
+      const response = await fetch("/api/auth/logout", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        credentials: "include" // Importante para incluir os cookies
+      });
+
+      if (response.ok) {
+        router.replace("/login");
+      } else {
+        console.error("Erro ao fazer logout:", response.statusText);
+        // Mesmo com erro, redireciona para tela de login
+        router.replace("/login");
       }
-    })
+    } catch (error) {
+      console.error("Erro ao fazer logout:", error);
+      // Redirecionamento forçado em caso de erro
+      router.replace("/login");
+    }
   }
 
   return (

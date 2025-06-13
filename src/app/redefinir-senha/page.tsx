@@ -1,22 +1,22 @@
 "use client"
 
-import Image from "next/image"
 import Link from "next/link"
-import SignupForm from "../_components/signup-form"
+// Importe o componente de formulário específico para redefinição de senha
+// Crie este componente em um local como: ../_components/redefinir-senha-form.tsx
+import { RedefinirSenhaForm } from "../_components/redefinir-senha-form" 
 import { motion } from "framer-motion"
-//import logoImg from "@/../public/images/logo.png"
 
-export default function Signup() {
+export default function RedefinirSenhaPage() {
   return (
     <div className="min-vh-100 d-flex align-items-center justify-content-center position-relative py-5">
-      {/* Background gradiente animado */}
+      {/* Background gradiente animado (mantido do login) */}
       <div className="position-absolute top-0 start-0 w-100 h-100 bg-gradient-dark overflow-hidden">
         <div className="position-absolute w-100 h-100 opacity-10">
           <div
             className="position-absolute top-0 start-0 w-100 h-100 animate-background"
             style={{
               background:
-                "linear-gradient(45deg, rgba(25,135,84,0.1) 0%, rgba(25,135,84,0) 70%, rgba(251,169,49,0.1) 100%)",
+                "linear-gradient(45deg, rgba(251,169,49,0.1) 0%, rgba(251,169,49,0) 70%, rgba(25,135,84,0.1) 100%)",
               backgroundSize: "400% 400%",
             }}
           ></div>
@@ -32,25 +32,20 @@ export default function Signup() {
               transition={{ duration: 0.5 }}
               className="text-center mb-4"
             >
+              {/* Elemento de brilho/logo (mantido do login, mas sem a imagem real) */}
               <div className="position-relative d-inline-block mb-3">
                 <div
-                  className="position-absolute top-50 start-50 translate-middle rounded-circle bg-success"
+                  className="position-absolute top-50 start-50 translate-middle rounded-circle bg-primary"
                   style={{ width: "180px", height: "180px", filter: "blur(40px)", opacity: "0.2" }}
                 ></div>
-                {/*<Image
-                  src={logoImg || "/placeholder.svg"}
-                  alt="Logo Venda Mais"
-                  width={160}
-                  height={160}
-                  className="img-fluid position-relative"
-                  style={{ objectFit: "contain" }}
-                  priority
-                />*/}
+                {/* Se você tiver uma logo específica para esta página, pode inserí-la aqui */}
               </div>
               <h1 className="display-6 fw-bold text-white mb-2">
-                Crie sua <span className="text-primary">Conta</span>
+                Redefinir <span className="text-primary">Senha</span>
               </h1>
-              <p className="text-light-emphasis mb-4">Comece agora a vender mais pelo WhatsApp!</p>
+              <p className="text-light-emphasis mb-4">
+                Crie uma nova senha para sua conta.
+              </p>
             </motion.div>
 
             <motion.div
@@ -58,7 +53,7 @@ export default function Signup() {
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.2, duration: 0.5 }}
             >
-              {/* Card do Formulário com efeito de vidro */}
+              {/* Card do Formulário com efeito de vidro (mantido do login) */}
               <div
                 className="card border-0 shadow-lg"
                 style={{
@@ -68,16 +63,16 @@ export default function Signup() {
                 }}
               >
                 <div className="card-body p-4 p-md-5">
-                  <SignupForm />
+                  {/* Componente do formulário de redefinição de senha */}
+                  <RedefinirSenhaForm />
                 </div>
               </div>
 
-              {/* Link para Login */}
+              {/* Link para Voltar ao Login (opcional, dependendo do fluxo) */}
               <div className="text-center mt-4" style={{ position: 'relative', zIndex: 10 }}>
                 <p className="text-light">
-                  Já tem uma conta?{" "}
                   <Link href="/login" className="text-primary text-decoration-none fw-semibold hover-scale-sm">
-                    Faça login
+                    Voltar para o Login
                   </Link>
                 </p>
               </div>

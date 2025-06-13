@@ -4,7 +4,7 @@ import Image from "next/image"
 import Link from "next/link"
 import { useState } from "react"
 import { HomeIcon, UserIcon, QrCodeIcon, PackageIcon, PlusCircleIcon, ChevronDown, ChevronUp, SearchIcon } from "lucide-react"
-import { ButtonSignOut } from "./button-signout"
+import { ButtonSignOutSimple } from "./button-signout-simple"
 
 export function ModernSidebar({ userName }: { userName: string }) {
     const [isOpen, setIsOpen] = useState(false)
@@ -65,7 +65,7 @@ export function ModernSidebar({ userName }: { userName: string }) {
 
             {/* Botão Sair */}
             <div className="p-3 border-top">
-                <ButtonSignOut />
+                <ButtonSignOutSimple />
             </div>
         </div>
     )

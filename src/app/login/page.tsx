@@ -1,50 +1,87 @@
+"use client"
+
 import Link from "next/link"
 import { LoginForm } from "../_components/login-form"
 import Image from "next/image"
-import logoImg from "@/../public/images/logo.png"
+//import logoImg from "@/../public/images/logo.png"
+import { motion } from "framer-motion"
 
 export default function LoginPage() {
   return (
-    <div className="min-vh-100 d-flex align-items-center justify-content-center bg-gradient-dark py-5">
-      <div className="container">
+    <div className="min-vh-100 d-flex align-items-center justify-content-center position-relative py-5">
+      {/* Background gradiente animado */}
+      <div className="position-absolute top-0 start-0 w-100 h-100 bg-gradient-dark overflow-hidden">
+        <div className="position-absolute w-100 h-100 opacity-10">
+          <div
+            className="position-absolute top-0 start-0 w-100 h-100 animate-background"
+            style={{
+              background:
+                "linear-gradient(45deg, rgba(251,169,49,0.1) 0%, rgba(251,169,49,0) 70%, rgba(25,135,84,0.1) 100%)",
+              backgroundSize: "400% 400%",
+            }}
+          ></div>
+        </div>
+      </div>
+
+      <div className="container position-relative">
         <div className="row justify-content-center">
-          <div className="col-12 col-md-8 col-lg-6">
-            {/* Logo e Cabeçalho */}
-            <div className="text-center mb-4">
-              <Image
-                src={logoImg}
-                alt="Logo"
-                width={320}
-                height={320}
-                className="img-fluid mb-4"
-              />
-              <h1 className="display-6 fw-bold text-white mb-2">
-                Bem-vindo ao VendaMais
-              </h1>
-              <p className="text-light-emphasis mb-2">
-                Entre com suas credenciais para acessar sua conta
-              </p>
-            </div>
-
-            {/* Card do Formulário */}
-            <div className="card border-0 shadow-lg">
-              <div className="card-body p-4 p-md-5">
-                <LoginForm />
+          <div className="col-12 col-md-8 col-lg-5">
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5 }}
+              className="text-center mb-4"
+            >
+              <div className="position-relative d-inline-block mb-3">
+                <div
+                  className="position-absolute top-50 start-50 translate-middle rounded-circle bg-primary"
+                  style={{ width: "180px", height: "180px", filter: "blur(40px)", opacity: "0.2" }}
+                ></div>
+                {/*<Image
+                  src={logoImg || "/placeholder.svg"}
+                  alt="Logo"
+                  width={160}
+                  height={160}
+                  className="img-fluid position-relative"
+                  style={{ objectFit: "contain" }}
+                  priority
+                />*/}
               </div>
-            </div>
+              <h1 className="display-6 fw-bold text-white mb-2">
+                Bem-vindo ao <span className="text-primary">VendaMais</span>
+              </h1>
+              <p className="text-light-emphasis mb-4">Entre com suas credenciais para acessar sua conta</p>
+            </motion.div>
 
-            {/* Link para Cadastro */}
-            <div className="text-center mt-4">
-              <p className="text-light">
-                Não tem uma conta?{" "}
-                <Link
-                  href="/signup"
-                  className="text-primary text-decoration-none fw-semibold"
-                >
-                  Cadastre-se
-                </Link>
-              </p>
-            </div>
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.2, duration: 0.5 }}
+            >
+              {/* Card do Formulário com efeito de vidro */}
+              <div
+                className="card border-0 shadow-lg"
+                style={{
+                  background: "rgba(255, 255, 255, 0.9)",
+                  backdropFilter: "blur(10px)",
+                  borderRadius: "1rem",
+                }}
+              >
+                <div className="card-body p-4 p-md-5">
+                  <LoginForm />
+                </div>
+              </div>
+
+              {/* Link para Cadastro */}
+              <div className="text-center mt-4" style={{ position: 'relative', zIndex: 10 }}>
+                <p className="text-light">
+                  Não tem uma conta?{" "}
+                  <Link href="/signup" className="text-primary text-decoration-none fw-semibold hover-scale-sm">
+                    Cadastre-se
+                  </Link>
+                </p>
+              </div>
+            </motion.div>
           </div>
         </div>
       </div>
