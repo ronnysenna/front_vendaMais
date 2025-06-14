@@ -29,8 +29,11 @@ RUN if [ ! -f .env ]; then \
 RUN find src -name "*.tsx" -o -name "*.ts" -exec grep -l "useSearchParams" {} \; || echo "Nenhum useSearchParams encontrado"
 RUN find src -name "*.tsx" -o -name "*.ts" -exec grep -l "Suspense" {} \; || echo "Nenhum Suspense encontrado"
 
-# Compila o projeto Next.js
-RUN yarn build
+# Limpa o cache do Next.js antes do build para garantir uma compilação limpa
+RUN rm -rf .next
+
+# Compila o projeto Next.js com um timestamp único para evitar problemas de cache
+RUN echo "Build iniciado em $(date)" && yarn build
 
 # Estágio de produção - imagem mais leve
 FROM node:20.11-alpine3.19 AS runner

@@ -5,6 +5,7 @@
   "scripts": {
     "dev": "NODE_ENV=development dotenv -e .env -- next dev",
     "build": "NODE_ENV=production dotenv -e .env -- next build",
+    "build:clean": "rm -rf .next && NODE_ENV=production dotenv -e .env -- next build",
     "start": "NODE_ENV=production dotenv -e .env -- next start",
     "lint": "next lint",
     "generate": "prisma generate",
@@ -19,7 +20,8 @@
     "test:all": "./scripts/vendamais-master.sh test-all",
     "test:build": "./scripts/vendamais-master.sh test-build",
     "validate:docker": "./scripts/vendamais-master.sh validate-docker",
-    "docker:deploy": "./scripts/vendamais-master.sh docker-deploy"
+    "docker:deploy": "./scripts/vendamais-master.sh docker-deploy",
+    "cache:clear": "rm -rf .next/cache"
   },
   "dependencies": {
     "@hookform/resolvers": "^5.0.1",
