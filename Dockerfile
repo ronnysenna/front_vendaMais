@@ -10,7 +10,7 @@ COPY package.json yarn.lock ./
 COPY prisma ./prisma/
 
 # Instala dependências
-RUN yarn install --immutable
+RUN yarn install --immutable || npm install
 
 # Gera Prisma Client
 RUN npx prisma generate
@@ -24,9 +24,9 @@ RUN if [ ! -f .env.production ]; then \
     touch .env.production; \
     fi
 
-# Verifica a presença de useSearchParams() sem Suspense
-RUN grep -r "useSearchParams" --include="*.tsx" --include="*.ts" src/ || echo "Nenhum useSearchParams encontrado"
-RUN grep -r "Suspense" --include="*.tsx" --include="*.ts" src/ || echo "Nenhum Suspense encontrado"
+# Verifica a presença de useSearchParams() e Suspense - usando find + grep para compatibilidade Alpine
+RUN find src -name "*.tsx" -o -name "*.ts" -exec grep -l "useSearchParams" {} \; || echo "Nenhum useSearchParams encontrado"
+RUN find src -name "*.tsx" -o -name "*.ts" -exec grep -l "Suspense" {} \; || echo "Nenhum Suspense encontrado"
 
 # Compila o projeto Next.js
 RUN yarn build
@@ -48,7 +48,11 @@ WORKDIR /app
 # Copia arquivos necessários da etapa de construção
 COPY --from=builder /app/next.config.* ./
 COPY --from=builder /app/public ./public
-COPY --from=builder /app/package.json yarn.lock ./
+COPY --from=builder /app/package.json ./
+# Copia o yarn.lock se existir
+COPY --from=builder /app/yarn.lock* ./
+# Copia o package-lock.json se existir
+COPY --from=builder /app/package-lock.json* ./
 COPY --from=builder /app/.next ./.next
 COPY --from=builder /app/prisma ./prisma
 COPY --from=builder /app/.env* ./
@@ -58,7 +62,11 @@ ENV NODE_OPTIONS="--max-old-space-size=4096"
 ENV NEXT_SHARP_PATH="/app/node_modules/sharp"
 
 # Instala apenas dependências de produção
-RUN yarn install --immutable --production
+RUN if [ -f yarn.lock ]; then \
+    yarn install --immutable --production; \
+    else \
+    npm ci --production; \
+    fi
 
 # Instala wget para o healthcheck
 RUN apk add --no-cache wget
