@@ -31,9 +31,13 @@ RUN find src -name "*.tsx" -o -name "*.ts" -exec grep -l "Suspense" {} \; || ech
 
 # Limpa o cache do Next.js antes do build para garantir uma compilação limpa
 RUN rm -rf .next
+RUN rm -rf node_modules/.cache
+
+# Define uma variável de ambiente com o timestamp do build
+ENV NEXT_PUBLIC_BUILD_ID=build-$(date +%s)
 
 # Compila o projeto Next.js com um timestamp único para evitar problemas de cache
-RUN echo "Build iniciado em $(date)" && yarn build
+RUN echo "Build iniciado em $(date) com ID ${NEXT_PUBLIC_BUILD_ID}" && yarn build
 
 # Estágio de produção - imagem mais leve
 FROM node:20.11-alpine3.19 AS runner
