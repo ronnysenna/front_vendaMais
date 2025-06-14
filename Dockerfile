@@ -37,14 +37,16 @@ RUN rm -rf node_modules/.cache
 # O Docker não permite comandos shell diretamente em ENV, então geramos e usamos em etapas separadas
 RUN echo "build-$(date +%s)" > /tmp/build_id
 
-# Compila o projeto Next.js com um timestamp único como BUILD_ID para evitar problemas de cache
-# Definimos a variável de ambiente aqui para que seja usada durante o build
-RUN export NEXT_PUBLIC_BUILD_ID=$(cat /tmp/build_id) && \
-    echo "Build iniciado em $(date) com ID $NEXT_PUBLIC_BUILD_ID" && \
-    yarn build
+# Adiciona o build ID ao arquivo .env antes de compilar
+RUN BUILD_ID=$(cat /tmp/build_id) && \
+    echo "NEXT_PUBLIC_BUILD_ID=$BUILD_ID" >> .env && \
+    echo "Build ID gerado: $BUILD_ID" && \
+    echo "Conteúdo do arquivo .env:" && \
+    cat .env
 
-# Define a variável de ambiente permanente com o mesmo valor usado no build
-# (será copiada para o estágio de produção no .env.production)
+# Compila o projeto Next.js com o timestamp único definido no .env
+RUN echo "Build iniciado em $(date)" && \
+    yarn build
 RUN echo "NEXT_PUBLIC_BUILD_ID=$(cat /tmp/build_id)" >> .env
 
 # Estágio de produção - imagem mais leve

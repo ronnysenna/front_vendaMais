@@ -1,7 +1,7 @@
 // Este arquivo implementa testes automatizados para verificar se o layout está atualizado
 // e se os mecanismos anti-cache estão funcionando corretamente
 
-import { describe, it, expect, beforeAll, afterAll } from "vitest";
+import { describe, it, expect, beforeAll, afterAll, beforeEach, afterEach } from "vitest";
 import { chromium, Browser, Page } from "playwright-chromium";
 
 describe("Testes de layout e cache", () => {
