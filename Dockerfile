@@ -89,8 +89,8 @@ RUN if [ -f yarn.lock ]; then \
 # Instala wget para o healthcheck
 RUN apk add --no-cache wget
 
-# Expõe a porta padrão do Next.js
-EXPOSE 3000
+# Expõe tanto a porta 3000 quanto a 80 para compatibilidade
+EXPOSE 3000 80
 
 # Configura permissões corretas
 RUN chown -R nextjs:nodejs /app
@@ -98,9 +98,9 @@ RUN chown -R nextjs:nodejs /app
 # Muda para o usuário não-root
 USER nextjs
 
-# Saúde da aplicação
-HEALTHCHECK --interval=30s --timeout=30s --start-period=5s --retries=3 \
-    CMD wget --no-verbose --tries=1 --spider http://localhost:3000/ || exit 1
+# Saúde da aplicação - verifica a porta definida na variável PORT ou a 3000 por padrão
+HEALTHCHECK --interval=15s --timeout=30s --start-period=10s --retries=3 \
+    CMD wget --no-verbose --tries=2 --spider http://localhost:${PORT:-3000}/ || exit 1
 
-# Inicia o servidor Next.js (sem depender de dotenv-cli)
-CMD ["node_modules/.bin/next", "start"]
+# Inicia o servidor Next.js com configuração de porta
+CMD ["sh", "-c", "node_modules/.bin/next start -p ${PORT:-3000}"]

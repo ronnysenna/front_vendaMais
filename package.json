@@ -30,7 +30,8 @@
     "cache:clean": "chmod +x ./scripts/clean-caches.sh && ./scripts/clean-caches.sh",
     "cache:clean:all": "chmod +x ./scripts/clean-caches.sh && ./scripts/clean-caches.sh --all",
     "update:buildid": "chmod +x ./scripts/update-build-id.sh && ./scripts/update-build-id.sh",
-    "start:server": "chmod +x ./scripts/start-server.sh && ./scripts/start-server.sh"
+    "start:server": "chmod +x ./scripts/start-server.sh && ./scripts/start-server.sh",
+    "check:service": "chmod +x ./scripts/check-service.sh && ./scripts/check-service.sh"
   },
   "dependencies": {
     "@hookform/resolvers": "^5.0.1",
