@@ -1,6 +1,6 @@
 # Usando abordagem de multi-estágios para uma imagem de produção otimizada
 # Estágio de construção
-FROM node:20-alpine3.19-slim AS builder
+FROM node:20.11-alpine3.19 AS builder
 
 # Define diretório de trabalho
 WORKDIR /app
@@ -32,7 +32,7 @@ RUN grep -r "Suspense" --include="*.tsx" --include="*.ts" src/ || echo "Nenhum S
 RUN yarn build
 
 # Estágio de produção - imagem mais leve
-FROM node:20-alpine3.19-slim AS runner
+FROM node:20.11-alpine3.19 AS runner
 
 # Define variáveis de ambiente para produção
 ENV NODE_ENV=production
