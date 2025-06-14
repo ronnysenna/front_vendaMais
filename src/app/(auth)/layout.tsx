@@ -1,10 +1,14 @@
-import { ReactNode } from "react"
-import { ModernSidebar } from "@/components/ui/modern-sidebar"
-import { getProtectedSession } from "@/lib/get-protected-session"
-import "../globals.css"
+import { ReactNode } from "react";
+import { ModernSidebar } from "@/components/ui/modern-sidebar";
+import { getProtectedSession } from "@/lib/get-protected-session";
+import "../globals.css";
 
-export default async function AuthenticatedLayout({ children }: { children: ReactNode }) {
-  const session = await getProtectedSession()
+export default async function AuthenticatedLayout({
+  children,
+}: {
+  children: ReactNode;
+}) {
+  const session = await getProtectedSession();
 
   return (
     <div className="d-flex vh-100">
@@ -16,5 +20,5 @@ export default async function AuthenticatedLayout({ children }: { children: Reac
         </div>
       </main>
     </div>
-  )
+  );
 }

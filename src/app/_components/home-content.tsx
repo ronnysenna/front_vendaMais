@@ -1,8 +1,8 @@
-"use client"
+"use client";
 
-import Link from "next/link"
-import { useState, useEffect } from "react"
-import { motion } from "framer-motion"
+import Link from "next/link";
+import { useState, useEffect } from "react";
+import { motion } from "framer-motion";
 import {
   Phone,
   ShoppingBag,
@@ -13,21 +13,21 @@ import {
   Check,
   CaretRight,
   Sparkle,
-} from "@phosphor-icons/react"
+} from "@phosphor-icons/react";
 
 interface HomeContentProps {
-  isLoggedIn: boolean
+  isLoggedIn: boolean;
 }
 
 export function HomeContent({ isLoggedIn = false }: HomeContentProps) {
-  const [mounted, setMounted] = useState(false)
-  const [activeTab, setActiveTab] = useState("monthly")
+  const [mounted, setMounted] = useState(false);
+  const [activeTab, setActiveTab] = useState("monthly");
 
   useEffect(() => {
-    setMounted(true)
-  }, [])
+    setMounted(true);
+  }, []);
 
-  if (!mounted) return null
+  if (!mounted) return null;
 
   return (
     <div className="min-h-screen">
@@ -38,8 +38,14 @@ export function HomeContent({ isLoggedIn = false }: HomeContentProps) {
         <div className="container position-relative py-5">
           <div className="row align-items-center min-vh-75 py-5">
             <div className="col-lg-6">
-              <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}>
-                <span className="badge bg-light text-primary mb-3">Novo! Versão 2.0 disponível</span>
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.5 }}
+              >
+                <span className="badge bg-light text-primary mb-3">
+                  Novo! Versão 2.0 disponível
+                </span>
 
                 <h1 className="display-4 fw-bold mb-4">
                   Transforme seu WhatsApp em uma
@@ -61,21 +67,33 @@ export function HomeContent({ isLoggedIn = false }: HomeContentProps) {
                 </h1>
 
                 <p className="lead mb-4 text-secondary">
-                  Automatize seu atendimento, organize seus produtos e aumente suas vendas com nossa plataforma completa
-                  de gestão de vendas via WhatsApp.
+                  Automatize seu atendimento, organize seus produtos e aumente
+                  suas vendas com nossa plataforma completa de gestão de vendas
+                  via WhatsApp.
                 </p>
 
                 <div className="d-flex gap-3">
                   {isLoggedIn ? (
-                    <Link href="/dashboard" className="btn btn-primary btn-lg px-4">
-                      Acessar Painel <CaretRight className="ms-2" size={20} weight="bold" />
+                    <Link
+                      href="/dashboard"
+                      className="btn btn-primary btn-lg px-4"
+                    >
+                      Acessar Painel{" "}
+                      <CaretRight className="ms-2" size={20} weight="bold" />
                     </Link>
                   ) : (
                     <>
-                      <Link href="/signup" className="btn btn-primary btn-lg px-4">
-                        Começar Grátis <Sparkle className="ms-2" size={20} weight="fill" />
+                      <Link
+                        href="/signup"
+                        className="btn btn-primary btn-lg px-4"
+                      >
+                        Começar Grátis{" "}
+                        <Sparkle className="ms-2" size={20} weight="fill" />
                       </Link>
-                      <Link href="/login" className="btn btn-outline-primary btn-lg px-4">
+                      <Link
+                        href="/login"
+                        className="btn btn-outline-primary btn-lg px-4"
+                      >
                         Fazer Login
                       </Link>
                     </>
@@ -88,14 +106,19 @@ export function HomeContent({ isLoggedIn = false }: HomeContentProps) {
                       <div
                         key={i}
                         className="rounded-circle bg-light border-2 border-white d-flex align-items-center justify-content-center"
-                        style={{ width: "32px", height: "32px", marginLeft: i > 1 ? "-8px" : "0" }}
+                        style={{
+                          width: "32px",
+                          height: "32px",
+                          marginLeft: i > 1 ? "-8px" : "0",
+                        }}
                       >
                         <span className="small fw-medium">{i}</span>
                       </div>
                     ))}
                   </div>
                   <div className="text-secondary small">
-                    <span className="fw-medium">+2.500</span> empresas já utilizam
+                    <span className="fw-medium">+2.500</span> empresas já
+                    utilizam
                   </div>
                 </div>
               </motion.div>
@@ -111,18 +134,34 @@ export function HomeContent({ isLoggedIn = false }: HomeContentProps) {
                 <div className="position-absolute top-0 start-50 translate-middle-x">
                   <div
                     className="bg-primary rounded-circle"
-                    style={{ width: "250px", height: "250px", filter: "blur(80px)", opacity: "0.3" }}
+                    style={{
+                      width: "250px",
+                      height: "250px",
+                      filter: "blur(80px)",
+                      opacity: "0.3",
+                    }}
                   ></div>
                 </div>
 
                 <div className="card border-0 shadow-lg overflow-hidden">
                   <div className="card-header bg-white d-flex align-items-center p-2 border-0">
                     <div className="d-flex gap-1 me-2">
-                      <div className="rounded-circle bg-danger" style={{ width: "12px", height: "12px" }}></div>
-                      <div className="rounded-circle bg-warning" style={{ width: "12px", height: "12px" }}></div>
-                      <div className="rounded-circle bg-success" style={{ width: "12px", height: "12px" }}></div>
+                      <div
+                        className="rounded-circle bg-danger"
+                        style={{ width: "12px", height: "12px" }}
+                      ></div>
+                      <div
+                        className="rounded-circle bg-warning"
+                        style={{ width: "12px", height: "12px" }}
+                      ></div>
+                      <div
+                        className="rounded-circle bg-success"
+                        style={{ width: "12px", height: "12px" }}
+                      ></div>
                     </div>
-                    <div className="small text-center w-100 text-secondary">Venda Mais - Dashboard</div>
+                    <div className="small text-center w-100 text-secondary">
+                      Venda Mais - Dashboard
+                    </div>
                   </div>
 
                   <div className="card-body p-4">
@@ -137,31 +176,60 @@ export function HomeContent({ isLoggedIn = false }: HomeContentProps) {
                           </div>
                           <div>
                             <div className="fw-medium">Venda Mais</div>
-                            <div className="small text-secondary">Dashboard</div>
+                            <div className="small text-secondary">
+                              Dashboard
+                            </div>
                           </div>
                         </div>
-                        <div className="small fw-medium text-primary">Online</div>
+                        <div className="small fw-medium text-primary">
+                          Online
+                        </div>
                       </div>
 
                       <div className="row g-3">
                         {[
-                          { label: "Vendas Hoje", value: "R$ 1.250", change: "+12%" },
-                          { label: "Clientes Ativos", value: "38", change: "+5%" },
-                          { label: "Taxa de Resposta", value: "98%", change: "+2%" },
-                          { label: "Produtos Vendidos", value: "124", change: "+18%" },
+                          {
+                            label: "Vendas Hoje",
+                            value: "R$ 1.250",
+                            change: "+12%",
+                          },
+                          {
+                            label: "Clientes Ativos",
+                            value: "38",
+                            change: "+5%",
+                          },
+                          {
+                            label: "Taxa de Resposta",
+                            value: "98%",
+                            change: "+2%",
+                          },
+                          {
+                            label: "Produtos Vendidos",
+                            value: "124",
+                            change: "+18%",
+                          },
                         ].map((stat, i) => (
                           <div className="col-6" key={i}>
                             <div className="card card-status-primary p-3 h-100">
-                              <div className="small text-secondary">{stat.label}</div>
-                              <div className="fs-5 fw-semibold gradient-number">{stat.value}</div>
-                              <div className="small text-success">{stat.change}</div>
+                              <div className="small text-secondary">
+                                {stat.label}
+                              </div>
+                              <div className="fs-5 fw-semibold gradient-number">
+                                {stat.value}
+                              </div>
+                              <div className="small text-success">
+                                {stat.change}
+                              </div>
                             </div>
                           </div>
                         ))}
                       </div>
 
                       <div className="chart-placeholder">
-                        <ChartBar size={64} className="text-secondary opacity-25" />
+                        <ChartBar
+                          size={64}
+                          className="text-secondary opacity-25"
+                        />
                       </div>
                     </div>
                   </div>
@@ -176,9 +244,13 @@ export function HomeContent({ isLoggedIn = false }: HomeContentProps) {
       <section className="py-5 bg-light">
         <div className="container py-5">
           <div className="text-center mb-5">
-            <span className="badge bg-primary bg-opacity-10 text-primary mb-3">Recursos</span>
+            <span className="badge bg-primary bg-opacity-10 text-primary mb-3">
+              Recursos
+            </span>
             <h2 className="display-5 fw-bold mb-3">Recursos Poderosos</h2>
-            <p className="lead text-muted">Tudo que você precisa para vender mais pelo WhatsApp</p>
+            <p className="lead text-muted">
+              Tudo que você precisa para vender mais pelo WhatsApp
+            </p>
           </div>
 
           <div className="row g-4">
@@ -186,32 +258,38 @@ export function HomeContent({ isLoggedIn = false }: HomeContentProps) {
               {
                 icon: <Phone size={24} />,
                 title: "Multi-Dispositivos",
-                description: "Conecte múltiplos dispositivos e gerencie todas suas conversas em um só lugar.",
+                description:
+                  "Conecte múltiplos dispositivos e gerencie todas suas conversas em um só lugar.",
               },
               {
                 icon: <ShoppingBag size={24} />,
                 title: "Catálogo Digital",
-                description: "Crie um catálogo profissional com seus produtos e compartilhe facilmente.",
+                description:
+                  "Crie um catálogo profissional com seus produtos e compartilhe facilmente.",
               },
               {
                 icon: <ChartBar size={24} />,
                 title: "Relatórios Detalhados",
-                description: "Acompanhe suas vendas com relatórios e estatísticas em tempo real.",
+                description:
+                  "Acompanhe suas vendas com relatórios e estatísticas em tempo real.",
               },
               {
                 icon: <Lightning size={24} />,
                 title: "Resposta Rápida",
-                description: "Atenda seus clientes instantaneamente com respostas automáticas inteligentes.",
+                description:
+                  "Atenda seus clientes instantaneamente com respostas automáticas inteligentes.",
               },
               {
                 icon: <Shield size={24} />,
                 title: "100% Seguro",
-                description: "Suas conversas e dados são criptografados e protegidos.",
+                description:
+                  "Suas conversas e dados são criptografados e protegidos.",
               },
               {
                 icon: <Users size={24} />,
                 title: "Suporte Premium",
-                description: "Equipe dedicada para ajudar você em qualquer momento.",
+                description:
+                  "Equipe dedicada para ajudar você em qualquer momento.",
               },
             ].map((feature, i) => (
               <div className="col-md-6 col-lg-4" key={i}>
@@ -239,17 +317,33 @@ export function HomeContent({ isLoggedIn = false }: HomeContentProps) {
                 <div className="position-absolute top-0 start-50 translate-middle-x">
                   <div
                     className="bg-primary rounded-circle"
-                    style={{ width: "200px", height: "200px", filter: "blur(60px)", opacity: "0.2" }}
+                    style={{
+                      width: "200px",
+                      height: "200px",
+                      filter: "blur(60px)",
+                      opacity: "0.2",
+                    }}
                   ></div>
                 </div>
                 <div className="card border-0 shadow-lg overflow-hidden">
                   <div className="card-header bg-white d-flex align-items-center p-2 border-0">
                     <div className="d-flex gap-1 me-2">
-                      <div className="rounded-circle bg-danger" style={{ width: "12px", height: "12px" }}></div>
-                      <div className="rounded-circle bg-warning" style={{ width: "12px", height: "12px" }}></div>
-                      <div className="rounded-circle bg-success" style={{ width: "12px", height: "12px" }}></div>
+                      <div
+                        className="rounded-circle bg-danger"
+                        style={{ width: "12px", height: "12px" }}
+                      ></div>
+                      <div
+                        className="rounded-circle bg-warning"
+                        style={{ width: "12px", height: "12px" }}
+                      ></div>
+                      <div
+                        className="rounded-circle bg-success"
+                        style={{ width: "12px", height: "12px" }}
+                      ></div>
                     </div>
-                    <div className="small text-center w-100 text-secondary">Venda Mais - Catálogo</div>
+                    <div className="small text-center w-100 text-secondary">
+                      Venda Mais - Catálogo
+                    </div>
                   </div>
 
                   <div className="card-body p-4">
@@ -261,10 +355,15 @@ export function HomeContent({ isLoggedIn = false }: HomeContentProps) {
                               className="bg-light rounded mb-2 d-flex align-items-center justify-content-center"
                               style={{ height: "100px" }}
                             >
-                              <ShoppingBag size={32} className="text-secondary opacity-25" />
+                              <ShoppingBag
+                                size={32}
+                                className="text-secondary opacity-25"
+                              />
                             </div>
                             <div className="small fw-medium">Produto {i}</div>
-                            <div className="small text-secondary">R$ {(i * 49.9).toFixed(2)}</div>
+                            <div className="small text-secondary">
+                              R$ {(i * 49.9).toFixed(2)}
+                            </div>
                           </div>
                         </div>
                       ))}
@@ -274,8 +373,12 @@ export function HomeContent({ isLoggedIn = false }: HomeContentProps) {
               </div>
             </div>
             <div className="col-lg-6">
-              <span className="badge bg-primary bg-opacity-10 text-primary mb-3">Benefícios</span>
-              <h2 className="display-5 fw-bold mb-4">Por que escolher o Venda Mais?</h2>
+              <span className="badge bg-primary bg-opacity-10 text-primary mb-3">
+                Benefícios
+              </span>
+              <h2 className="display-5 fw-bold mb-4">
+                Por que escolher o Venda Mais?
+              </h2>
 
               <div className="d-flex align-items-start mb-4">
                 <div className="bg-primary bg-opacity-10 p-3 rounded-3 me-4">
@@ -284,7 +387,8 @@ export function HomeContent({ isLoggedIn = false }: HomeContentProps) {
                 <div>
                   <h4 className="mb-2">Resposta Rápida</h4>
                   <p className="text-muted mb-0">
-                    Atenda seus clientes instantaneamente com respostas automáticas inteligentes.
+                    Atenda seus clientes instantaneamente com respostas
+                    automáticas inteligentes.
                   </p>
                 </div>
               </div>
@@ -296,8 +400,8 @@ export function HomeContent({ isLoggedIn = false }: HomeContentProps) {
                 <div>
                   <h4 className="mb-2">100% Seguro</h4>
                   <p className="text-muted mb-0">
-                    Suas conversas e dados são criptografados e protegidos com as mais avançadas tecnologias de
-                    segurança.
+                    Suas conversas e dados são criptografados e protegidos com
+                    as mais avançadas tecnologias de segurança.
                   </p>
                 </div>
               </div>
@@ -309,7 +413,8 @@ export function HomeContent({ isLoggedIn = false }: HomeContentProps) {
                 <div>
                   <h4 className="mb-2">Suporte Premium</h4>
                   <p className="text-muted mb-0">
-                    Equipe dedicada para ajudar você em qualquer momento, 7 dias por semana.
+                    Equipe dedicada para ajudar você em qualquer momento, 7 dias
+                    por semana.
                   </p>
                 </div>
               </div>
@@ -322,9 +427,15 @@ export function HomeContent({ isLoggedIn = false }: HomeContentProps) {
       <section className="py-5 bg-light">
         <div className="container py-5">
           <div className="text-center mb-5">
-            <span className="badge bg-primary bg-opacity-10 text-primary mb-3">Planos</span>
-            <h2 className="display-5 fw-bold mb-3">Planos que Cabem no seu Bolso</h2>
-            <p className="lead text-muted">Escolha o plano ideal para o seu negócio</p>
+            <span className="badge bg-primary bg-opacity-10 text-primary mb-3">
+              Planos
+            </span>
+            <h2 className="display-5 fw-bold mb-3">
+              Planos que Cabem no seu Bolso
+            </h2>
+            <p className="lead text-muted">
+              Escolha o plano ideal para o seu negócio
+            </p>
           </div>
 
           <div className="mb-4">
@@ -349,7 +460,9 @@ export function HomeContent({ isLoggedIn = false }: HomeContentProps) {
           </div>
 
           <div className="tab-content">
-            <div className={`tab-pane fade ${activeTab === "monthly" ? "show active" : ""}`}>
+            <div
+              className={`tab-pane fade ${activeTab === "monthly" ? "show active" : ""}`}
+            >
               <div className="row g-4 justify-content-center">
                 <div className="col-md-6 col-lg-4">
                   <div className="card h-100 border-0 shadow-sm">
@@ -360,16 +473,29 @@ export function HomeContent({ isLoggedIn = false }: HomeContentProps) {
                         <p className="text-muted">Para pequenos negócios</p>
                       </div>
                       <ul className="list-unstyled mb-4">
-                        {["1 Dispositivo", "100 Produtos", "Catálogo Digital", "Relatórios Básicos"].map(
-                          (feature, i) => (
-                            <li className="d-flex align-items-center mb-2" key={i}>
-                              <Check size={18} className="text-success me-2" weight="bold" />
-                              <span>{feature}</span>
-                            </li>
-                          ),
-                        )}
+                        {[
+                          "1 Dispositivo",
+                          "100 Produtos",
+                          "Catálogo Digital",
+                          "Relatórios Básicos",
+                        ].map((feature, i) => (
+                          <li
+                            className="d-flex align-items-center mb-2"
+                            key={i}
+                          >
+                            <Check
+                              size={18}
+                              className="text-success me-2"
+                              weight="bold"
+                            />
+                            <span>{feature}</span>
+                          </li>
+                        ))}
                       </ul>
-                      <Link href="/signup" className="btn btn-outline-primary d-block">
+                      <Link
+                        href="/signup"
+                        className="btn btn-outline-primary d-block"
+                      >
                         Começar Agora
                       </Link>
                     </div>
@@ -379,13 +505,17 @@ export function HomeContent({ isLoggedIn = false }: HomeContentProps) {
                 <div className="col-md-6 col-lg-4">
                   <div className="card h-100 shadow-lg border-2 border-primary position-relative">
                     <div className="position-absolute top-0 start-50 translate-middle">
-                      <span className="badge bg-primary px-3 py-2">Mais Popular</span>
+                      <span className="badge bg-primary px-3 py-2">
+                        Mais Popular
+                      </span>
                     </div>
                     <div className="card-body p-4">
                       <div className="text-center mb-4">
                         <h4>Profissional</h4>
                         <div className="display-6 fw-bold mb-2">R$197/mês</div>
-                        <p className="text-muted">Para negócios em crescimento</p>
+                        <p className="text-muted">
+                          Para negócios em crescimento
+                        </p>
                       </div>
                       <ul className="list-unstyled mb-4">
                         {[
@@ -396,8 +526,15 @@ export function HomeContent({ isLoggedIn = false }: HomeContentProps) {
                           "Suporte Prioritário",
                           "API de Integração",
                         ].map((feature, i) => (
-                          <li className="d-flex align-items-center mb-2" key={i}>
-                            <Check size={18} className="text-success me-2" weight="bold" />
+                          <li
+                            className="d-flex align-items-center mb-2"
+                            key={i}
+                          >
+                            <Check
+                              size={18}
+                              className="text-success me-2"
+                              weight="bold"
+                            />
                             <span>{feature}</span>
                           </li>
                         ))}
@@ -411,7 +548,9 @@ export function HomeContent({ isLoggedIn = false }: HomeContentProps) {
               </div>
             </div>
 
-            <div className={`tab-pane fade ${activeTab === "yearly" ? "show active" : ""}`}>
+            <div
+              className={`tab-pane fade ${activeTab === "yearly" ? "show active" : ""}`}
+            >
               <div className="row g-4 justify-content-center">
                 <div className="col-md-6 col-lg-4">
                   <div className="card h-100 border-0 shadow-sm">
@@ -422,16 +561,29 @@ export function HomeContent({ isLoggedIn = false }: HomeContentProps) {
                         <p className="text-muted">Cobrado anualmente (R$924)</p>
                       </div>
                       <ul className="list-unstyled mb-4">
-                        {["1 Dispositivo", "100 Produtos", "Catálogo Digital", "Relatórios Básicos"].map(
-                          (feature, i) => (
-                            <li className="d-flex align-items-center mb-2" key={i}>
-                              <Check size={18} className="text-success me-2" weight="bold" />
-                              <span>{feature}</span>
-                            </li>
-                          ),
-                        )}
+                        {[
+                          "1 Dispositivo",
+                          "100 Produtos",
+                          "Catálogo Digital",
+                          "Relatórios Básicos",
+                        ].map((feature, i) => (
+                          <li
+                            className="d-flex align-items-center mb-2"
+                            key={i}
+                          >
+                            <Check
+                              size={18}
+                              className="text-success me-2"
+                              weight="bold"
+                            />
+                            <span>{feature}</span>
+                          </li>
+                        ))}
                       </ul>
-                      <Link href="/signup" className="btn btn-outline-primary d-block">
+                      <Link
+                        href="/signup"
+                        className="btn btn-outline-primary d-block"
+                      >
                         Começar Agora
                       </Link>
                     </div>
@@ -441,13 +593,17 @@ export function HomeContent({ isLoggedIn = false }: HomeContentProps) {
                 <div className="col-md-6 col-lg-4">
                   <div className="card h-100 shadow-lg border-2 border-primary position-relative">
                     <div className="position-absolute top-0 start-50 translate-middle">
-                      <span className="badge bg-primary px-3 py-2">Mais Popular</span>
+                      <span className="badge bg-primary px-3 py-2">
+                        Mais Popular
+                      </span>
                     </div>
                     <div className="card-body p-4">
                       <div className="text-center mb-4">
                         <h4>Profissional</h4>
                         <div className="display-6 fw-bold mb-2">R$157/mês</div>
-                        <p className="text-muted">Cobrado anualmente (R$1.884)</p>
+                        <p className="text-muted">
+                          Cobrado anualmente (R$1.884)
+                        </p>
                       </div>
                       <ul className="list-unstyled mb-4">
                         {[
@@ -458,8 +614,15 @@ export function HomeContent({ isLoggedIn = false }: HomeContentProps) {
                           "Suporte Prioritário",
                           "API de Integração",
                         ].map((feature, i) => (
-                          <li className="d-flex align-items-center mb-2" key={i}>
-                            <Check size={18} className="text-success me-2" weight="bold" />
+                          <li
+                            className="d-flex align-items-center mb-2"
+                            key={i}
+                          >
+                            <Check
+                              size={18}
+                              className="text-success me-2"
+                              weight="bold"
+                            />
                             <span>{feature}</span>
                           </li>
                         ))}
@@ -497,7 +660,8 @@ export function HomeContent({ isLoggedIn = false }: HomeContentProps) {
                 viewport={{ once: true }}
                 transition={{ delay: 0.2, duration: 0.5 }}
               >
-                Junte-se a milhares de empresas que já aumentaram suas vendas com nossa plataforma.
+                Junte-se a milhares de empresas que já aumentaram suas vendas
+                com nossa plataforma.
               </motion.p>
               <motion.div
                 initial={{ opacity: 0, y: 20 }}
@@ -506,7 +670,8 @@ export function HomeContent({ isLoggedIn = false }: HomeContentProps) {
                 transition={{ delay: 0.4, duration: 0.5 }}
               >
                 <Link href="/signup" className="btn btn-light btn-lg px-5">
-                  Criar Conta Grátis <Sparkle size={20} className="ms-2" weight="fill" />
+                  Criar Conta Grátis{" "}
+                  <Sparkle size={20} className="ms-2" weight="fill" />
                 </Link>
               </motion.div>
             </div>
@@ -521,7 +686,8 @@ export function HomeContent({ isLoggedIn = false }: HomeContentProps) {
             <div className="col-lg-4">
               <h3 className="h4 mb-4">Venda Mais</h3>
               <p className="mb-4">
-                Transforme seu WhatsApp em uma ferramenta de vendas profissional e aumente seus resultados.
+                Transforme seu WhatsApp em uma ferramenta de vendas profissional
+                e aumente seus resultados.
               </p>
               <div className="d-flex gap-3">
                 <a href="#" className="text-white opacity-75 hover-scale">
@@ -566,27 +732,42 @@ export function HomeContent({ isLoggedIn = false }: HomeContentProps) {
               <h3 className="h5 mb-3">Links Rápidos</h3>
               <ul className="list-unstyled">
                 <li className="mb-2">
-                  <a href="#" className="text-white opacity-75 text-decoration-none">
+                  <a
+                    href="#"
+                    className="text-white opacity-75 text-decoration-none"
+                  >
                     Recursos
                   </a>
                 </li>
                 <li className="mb-2">
-                  <a href="#" className="text-white opacity-75 text-decoration-none">
+                  <a
+                    href="#"
+                    className="text-white opacity-75 text-decoration-none"
+                  >
                     Preços
                   </a>
                 </li>
                 <li className="mb-2">
-                  <a href="#" className="text-white opacity-75 text-decoration-none">
+                  <a
+                    href="#"
+                    className="text-white opacity-75 text-decoration-none"
+                  >
                     Sobre Nós
                   </a>
                 </li>
                 <li className="mb-2">
-                  <a href="#" className="text-white opacity-75 text-decoration-none">
+                  <a
+                    href="#"
+                    className="text-white opacity-75 text-decoration-none"
+                  >
                     Blog
                   </a>
                 </li>
                 <li className="mb-2">
-                  <a href="#" className="text-white opacity-75 text-decoration-none">
+                  <a
+                    href="#"
+                    className="text-white opacity-75 text-decoration-none"
+                  >
                     Contato
                   </a>
                 </li>
@@ -612,11 +793,12 @@ export function HomeContent({ isLoggedIn = false }: HomeContentProps) {
           </div>
           <div className="border-top border-secondary mt-4 pt-4 text-center">
             <p className="small text-white opacity-75 mb-0">
-              &copy; {new Date().getFullYear()} Venda Mais. Todos os direitos reservados.
+              &copy; {new Date().getFullYear()} Venda Mais. Todos os direitos
+              reservados.
             </p>
           </div>
         </div>
       </footer>
     </div>
-  )
+  );
 }

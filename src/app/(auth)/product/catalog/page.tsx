@@ -1,10 +1,10 @@
 // app/auth/products/catalog/page.tsx
-'use client';
+"use client";
 
-import { useState } from 'react';
-import Link from 'next/link';
-import Image from 'next/image';
-import { SearchIcon, Loader2, EditIcon, Plus, AlertCircle } from 'lucide-react';
+import { useState } from "react";
+import Link from "next/link";
+import Image from "next/image";
+import { SearchIcon, Loader2, EditIcon, Plus, AlertCircle } from "lucide-react";
 
 interface Product {
   id: string;
@@ -18,12 +18,13 @@ interface Product {
 }
 
 export default function ProductsCatalogPage() {
-  const [searchTerm, setSearchTerm] = useState('');
+  const [searchTerm, setSearchTerm] = useState("");
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const N8N_SEARCH_PRODUCTS_WEBHOOK_URL = 'https://n8n.ronnysenna.com.br/webhook/buscar-produtos';
+  const N8N_SEARCH_PRODUCTS_WEBHOOK_URL =
+    "https://n8n.ronnysenna.com.br/webhook/buscar-produtos";
 
   const handleSearch = async () => {
     setLoading(true);
@@ -32,9 +33,9 @@ export default function ProductsCatalogPage() {
 
     try {
       const response = await fetch(N8N_SEARCH_PRODUCTS_WEBHOOK_URL, {
-        method: 'POST',
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
         body: JSON.stringify({ searchTerm: searchTerm.trim() }),
       });
@@ -46,8 +47,10 @@ export default function ProductsCatalogPage() {
       const data = await response.json();
       setProducts(data);
     } catch (error) {
-      console.error('Erro:', error);
-      setError(error instanceof Error ? error.message : 'Erro ao buscar produtos');
+      console.error("Erro:", error);
+      setError(
+        error instanceof Error ? error.message : "Erro ao buscar produtos",
+      );
     } finally {
       setLoading(false);
     }
@@ -66,8 +69,12 @@ export default function ProductsCatalogPage() {
         <div className="card-body p-4">
           <div className="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 mb-4">
             <div>
-              <h1 className="h3 mb-1 fw-bold gradient-number">Catálogo de Produtos</h1>
-              <p className="text-muted mb-0">Gerencie seus produtos e estoque</p>
+              <h1 className="h3 mb-1 fw-bold gradient-number">
+                Catálogo de Produtos
+              </h1>
+              <p className="text-muted mb-0">
+                Gerencie seus produtos e estoque
+              </p>
             </div>
             <Link
               href="/product/addProduct"
@@ -79,7 +86,12 @@ export default function ProductsCatalogPage() {
           </div>
 
           <div className="card-status-info p-3 rounded-3 mb-4">
-            <form onSubmit={(e) => { e.preventDefault(); handleSearch(); }}>
+            <form
+              onSubmit={(e) => {
+                e.preventDefault();
+                handleSearch();
+              }}
+            >
               <div className="profile-form-group mb-0">
                 <div className="input-group">
                   <input
@@ -96,7 +108,10 @@ export default function ProductsCatalogPage() {
                   >
                     {loading ? (
                       <>
-                        <div className="spinner-border spinner-border-sm" role="status">
+                        <div
+                          className="spinner-border spinner-border-sm"
+                          role="status"
+                        >
                           <span className="visually-hidden">Carregando...</span>
                         </div>
                         <span>Buscando...</span>
@@ -143,15 +158,23 @@ export default function ProductsCatalogPage() {
                     <div className="card-body">
                       <h5 className="card-title mb-2">{product.name}</h5>
                       {product.description && (
-                        <p className="text-muted small mb-2">{product.description}</p>
+                        <p className="text-muted small mb-2">
+                          {product.description}
+                        </p>
                       )}
                       <div className="d-flex justify-content-between align-items-center mb-3">
-                        <span className="gradient-number h5 mb-0">R$ {product.value}</span>
-                        <span className="badge bg-info">Estoque: {product.stockQuantity}</span>
+                        <span className="gradient-number h5 mb-0">
+                          R$ {product.value}
+                        </span>
+                        <span className="badge bg-info">
+                          Estoque: {product.stockQuantity}
+                        </span>
                       </div>
                       {product.category && (
                         <div className="mb-3">
-                          <span className="badge bg-secondary">{product.category}</span>
+                          <span className="badge bg-secondary">
+                            {product.category}
+                          </span>
                         </div>
                       )}
                       <Link
@@ -166,14 +189,19 @@ export default function ProductsCatalogPage() {
                 </div>
               ))}
             </div>
-          ) : !loading && searchTerm && (
-            <div className="text-center p-5">
-              <div className="icon-glass rounded-circle p-3 d-inline-flex mb-3">
-                <SearchIcon size={24} className="text-muted" />
+          ) : (
+            !loading &&
+            searchTerm && (
+              <div className="text-center p-5">
+                <div className="icon-glass rounded-circle p-3 d-inline-flex mb-3">
+                  <SearchIcon size={24} className="text-muted" />
+                </div>
+                <h5>Nenhum produto encontrado</h5>
+                <p className="text-muted mb-0">
+                  Tente buscar com outros termos
+                </p>
               </div>
-              <h5>Nenhum produto encontrado</h5>
-              <p className="text-muted mb-0">Tente buscar com outros termos</p>
-            </div>
+            )
           )}
         </div>
       </div>

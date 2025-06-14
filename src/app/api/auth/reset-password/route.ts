@@ -9,7 +9,7 @@ export async function POST(request: NextRequest) {
     if (!password || !token) {
       return NextResponse.json(
         { error: "Senha e token são obrigatórios" },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -29,7 +29,7 @@ export async function POST(request: NextRequest) {
     if (!user) {
       return NextResponse.json(
         { error: "Token inválido ou expirado" },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -59,13 +59,13 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json(
       { message: "Senha redefinida com sucesso" },
-      { status: 200 }
+      { status: 200 },
     );
   } catch (error) {
     console.error("Erro ao redefinir senha:", error);
     return NextResponse.json(
       { error: "Erro interno ao processar solicitação" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

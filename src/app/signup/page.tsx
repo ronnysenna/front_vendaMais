@@ -1,9 +1,10 @@
-"use client"
+"use client";
 
-import Image from "next/image"
-import Link from "next/link"
-import SignupForm from "../_components/signup-form"
-import { motion } from "framer-motion"
+import Image from "next/image";
+import Link from "next/link";
+import SignupForm from "../_components/signup-form";
+import { motion } from "framer-motion";
+import { Suspense } from "react";
 //import logoImg from "@/../public/images/logo.png"
 
 export default function Signup() {
@@ -35,7 +36,12 @@ export default function Signup() {
               <div className="position-relative d-inline-block mb-3">
                 <div
                   className="position-absolute top-50 start-50 translate-middle rounded-circle bg-success"
-                  style={{ width: "180px", height: "180px", filter: "blur(40px)", opacity: "0.2" }}
+                  style={{
+                    width: "180px",
+                    height: "180px",
+                    filter: "blur(40px)",
+                    opacity: "0.2",
+                  }}
                 ></div>
                 {/*<Image
                   src={logoImg || "/placeholder.svg"}
@@ -50,7 +56,9 @@ export default function Signup() {
               <h1 className="display-6 fw-bold text-white mb-2">
                 Crie sua <span className="text-primary">Conta</span>
               </h1>
-              <p className="text-light-emphasis mb-4">Comece agora a vender mais pelo WhatsApp!</p>
+              <p className="text-light-emphasis mb-4">
+                Comece agora a vender mais pelo WhatsApp!
+              </p>
             </motion.div>
 
             <motion.div
@@ -68,15 +76,23 @@ export default function Signup() {
                 }}
               >
                 <div className="card-body p-4 p-md-5">
-                  <SignupForm />
+                  <Suspense fallback={<div>Carregando...</div>}>
+                    <SignupForm />
+                  </Suspense>
                 </div>
               </div>
 
               {/* Link para Login */}
-              <div className="text-center mt-4" style={{ position: 'relative', zIndex: 10 }}>
+              <div
+                className="text-center mt-4"
+                style={{ position: "relative", zIndex: 10 }}
+              >
                 <p className="text-light">
                   Já tem uma conta?{" "}
-                  <Link href="/login" className="text-primary text-decoration-none fw-semibold hover-scale-sm">
+                  <Link
+                    href="/login"
+                    className="text-primary text-decoration-none fw-semibold hover-scale-sm"
+                  >
                     Faça login
                   </Link>
                 </p>
@@ -86,5 +102,5 @@ export default function Signup() {
         </div>
       </div>
     </div>
-  )
+  );
 }

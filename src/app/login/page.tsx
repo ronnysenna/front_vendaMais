@@ -1,10 +1,11 @@
-"use client"
+"use client";
 
-import Link from "next/link"
-import { LoginForm } from "../_components/login-form"
-import Image from "next/image"
+import Link from "next/link";
+import { LoginForm } from "../_components/login-form";
+import Image from "next/image";
 //import logoImg from "@/../public/images/logo.png"
-import { motion } from "framer-motion"
+import { motion } from "framer-motion";
+import { Suspense } from "react";
 
 export default function LoginPage() {
   return (
@@ -35,7 +36,12 @@ export default function LoginPage() {
               <div className="position-relative d-inline-block mb-3">
                 <div
                   className="position-absolute top-50 start-50 translate-middle rounded-circle bg-primary"
-                  style={{ width: "180px", height: "180px", filter: "blur(40px)", opacity: "0.2" }}
+                  style={{
+                    width: "180px",
+                    height: "180px",
+                    filter: "blur(40px)",
+                    opacity: "0.2",
+                  }}
                 ></div>
                 {/*<Image
                   src={logoImg || "/placeholder.svg"}
@@ -50,7 +56,9 @@ export default function LoginPage() {
               <h1 className="display-6 fw-bold text-white mb-2">
                 Bem-vindo ao <span className="text-primary">VendaMais</span>
               </h1>
-              <p className="text-light-emphasis mb-4">Entre com suas credenciais para acessar sua conta</p>
+              <p className="text-light-emphasis mb-4">
+                Entre com suas credenciais para acessar sua conta
+              </p>
             </motion.div>
 
             <motion.div
@@ -68,15 +76,23 @@ export default function LoginPage() {
                 }}
               >
                 <div className="card-body p-4 p-md-5">
-                  <LoginForm />
+                  <Suspense fallback={<div>Carregando...</div>}>
+                    <LoginForm />
+                  </Suspense>
                 </div>
               </div>
 
               {/* Link para Cadastro */}
-              <div className="text-center mt-4" style={{ position: 'relative', zIndex: 10 }}>
+              <div
+                className="text-center mt-4"
+                style={{ position: "relative", zIndex: 10 }}
+              >
                 <p className="text-light">
                   Não tem uma conta?{" "}
-                  <Link href="/signup" className="text-primary text-decoration-none fw-semibold hover-scale-sm">
+                  <Link
+                    href="/signup"
+                    className="text-primary text-decoration-none fw-semibold hover-scale-sm"
+                  >
                     Cadastre-se
                   </Link>
                 </p>
@@ -86,5 +102,5 @@ export default function LoginPage() {
         </div>
       </div>
     </div>
-  )
+  );
 }

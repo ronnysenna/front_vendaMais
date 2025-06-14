@@ -15,7 +15,8 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   title: "VendaMais - Gestão de Vendas por WhatsApp",
-  description: "Automatize seu atendimento, organize seus produtos e aumente suas vendas",
+  description:
+    "Automatize seu atendimento, organize seus produtos e aumente suas vendas",
 };
 
 export default function RootLayout({
@@ -25,7 +26,9 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="pt-BR" className="h-100">
-      <body className={`${geistSans.variable} ${geistMono.variable} antialiased min-vh-100 bg-white`}>
+      <body
+        className={`${geistSans.variable} ${geistMono.variable} antialiased min-vh-100 bg-white`}
+      >
         {children}
       </body>
     </html>

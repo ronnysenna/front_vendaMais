@@ -18,7 +18,7 @@ export async function POST(request: NextRequest) {
       console.log("❌ Dados inválidos - campos obrigatórios faltando");
       return NextResponse.json(
         { error: "Nome, email e senha são obrigatórios" },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -26,7 +26,7 @@ export async function POST(request: NextRequest) {
       console.log("❌ Senhas não coincidem");
       return NextResponse.json(
         { error: "As senhas não coincidem" },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -40,7 +40,7 @@ export async function POST(request: NextRequest) {
       console.log("❌ Email já está em uso:", email);
       return NextResponse.json(
         { error: "Este e-mail já está em uso" },
-        { status: 409 }
+        { status: 409 },
       );
     }
 
@@ -92,7 +92,7 @@ export async function POST(request: NextRequest) {
           message: "Usuário cadastrado com sucesso",
           userId: user.id,
         },
-        { status: 201 }
+        { status: 201 },
       );
     } catch (dbError) {
       console.error("❌ ERRO DB:", dbError);
@@ -112,7 +112,7 @@ export async function POST(request: NextRequest) {
         error: "Erro ao processar o cadastro",
         details: error instanceof Error ? error.message : "Erro desconhecido",
       },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

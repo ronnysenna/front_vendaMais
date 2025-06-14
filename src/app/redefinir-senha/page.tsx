@@ -1,10 +1,11 @@
-"use client"
+"use client";
 
-import Link from "next/link"
+import Link from "next/link";
 // Importe o componente de formulário específico para redefinição de senha
 // Crie este componente em um local como: ../_components/redefinir-senha-form.tsx
-import { RedefinirSenhaForm } from "../_components/redefinir-senha-form" 
-import { motion } from "framer-motion"
+import { RedefinirSenhaForm } from "../_components/redefinir-senha-form";
+import { motion } from "framer-motion";
+import { Suspense } from "react";
 
 export default function RedefinirSenhaPage() {
   return (
@@ -36,7 +37,12 @@ export default function RedefinirSenhaPage() {
               <div className="position-relative d-inline-block mb-3">
                 <div
                   className="position-absolute top-50 start-50 translate-middle rounded-circle bg-primary"
-                  style={{ width: "180px", height: "180px", filter: "blur(40px)", opacity: "0.2" }}
+                  style={{
+                    width: "180px",
+                    height: "180px",
+                    filter: "blur(40px)",
+                    opacity: "0.2",
+                  }}
                 ></div>
                 {/* Se você tiver uma logo específica para esta página, pode inserí-la aqui */}
               </div>
@@ -64,14 +70,22 @@ export default function RedefinirSenhaPage() {
               >
                 <div className="card-body p-4 p-md-5">
                   {/* Componente do formulário de redefinição de senha */}
-                  <RedefinirSenhaForm />
+                  <Suspense fallback={<div>Carregando...</div>}>
+                    <RedefinirSenhaForm />
+                  </Suspense>
                 </div>
               </div>
 
               {/* Link para Voltar ao Login (opcional, dependendo do fluxo) */}
-              <div className="text-center mt-4" style={{ position: 'relative', zIndex: 10 }}>
+              <div
+                className="text-center mt-4"
+                style={{ position: "relative", zIndex: 10 }}
+              >
                 <p className="text-light">
-                  <Link href="/login" className="text-primary text-decoration-none fw-semibold hover-scale-sm">
+                  <Link
+                    href="/login"
+                    className="text-primary text-decoration-none fw-semibold hover-scale-sm"
+                  >
                     Voltar para o Login
                   </Link>
                 </p>
@@ -81,5 +95,5 @@ export default function RedefinirSenhaPage() {
         </div>
       </div>
     </div>
-  )
+  );
 }

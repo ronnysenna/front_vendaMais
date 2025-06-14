@@ -10,7 +10,7 @@ export async function POST(request: NextRequest) {
     if (!email) {
       return NextResponse.json(
         { error: "E-mail é obrigatório" },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -29,7 +29,7 @@ export async function POST(request: NextRequest) {
           message:
             "Se o e-mail estiver cadastrado, enviaremos um link de recuperação.",
         },
-        { status: 200 }
+        { status: 200 },
       );
     }
 
@@ -86,13 +86,13 @@ export async function POST(request: NextRequest) {
         message:
           "Se o e-mail estiver cadastrado, enviaremos um link de recuperação.",
       },
-      { status: 200 }
+      { status: 200 },
     );
   } catch (error) {
     console.error("Erro ao processar recuperação de senha:", error);
     return NextResponse.json(
       { error: "Erro interno ao processar solicitação" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

@@ -1,11 +1,11 @@
-"use client"
+"use client";
 
-import { useRouter } from "next/navigation"
-import { authClient } from "@/lib/auth-client"
-import { LogOut } from "lucide-react"
+import { useRouter } from "next/navigation";
+import { authClient } from "@/lib/auth-client";
+import { LogOut } from "lucide-react";
 
 export function ButtonSignOut() {
-  const router = useRouter()
+  const router = useRouter();
 
   async function signOut() {
     try {
@@ -13,9 +13,9 @@ export function ButtonSignOut() {
       const response = await fetch("/api/auth/logout", {
         method: "POST",
         headers: {
-          "Content-Type": "application/json"
+          "Content-Type": "application/json",
         },
-        credentials: "include" // Importante para incluir os cookies
+        credentials: "include", // Importante para incluir os cookies
       });
 
       if (response.ok) {
@@ -40,5 +40,5 @@ export function ButtonSignOut() {
       <LogOut size={18} />
       <span>Sair</span>
     </button>
-  )
+  );
 }

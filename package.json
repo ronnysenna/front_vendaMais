@@ -10,7 +10,14 @@
     "generate": "prisma generate",
     "prepare": "prisma generate",
     "check": "tsc --noEmit",
-    "format": "prettier --write ."
+    "format": "prettier --write .",
+    "analyze": "./scripts/analyze-project.sh",
+    "cleanup": "./scripts/analyze-cleanup.sh",
+    "security": "./scripts/security-check.sh",
+    "test:all": "./scripts/full-test.sh",
+    "test:build": "./scripts/test-build.sh",
+    "validate:docker": "./scripts/validate-docker.sh",
+    "docker:deploy": "./scripts/docker-deploy.sh"
   },
   "dependencies": {
     "@hookform/resolvers": "^5.0.1",

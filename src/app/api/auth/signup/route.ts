@@ -12,14 +12,14 @@ export async function POST(request: NextRequest) {
     if (!name || !email || !password) {
       return NextResponse.json(
         { error: "Nome, email e senha são obrigatórios" },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
     if (password !== confirmPassword) {
       return NextResponse.json(
         { error: "As senhas não coincidem" },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -31,7 +31,7 @@ export async function POST(request: NextRequest) {
     if (existingUser) {
       return NextResponse.json(
         { error: "Este e-mail já está em uso" },
-        { status: 409 }
+        { status: 409 },
       );
     }
 
@@ -80,7 +80,7 @@ export async function POST(request: NextRequest) {
         message: "Usuário cadastrado com sucesso",
         userId: result.user.id,
       },
-      { status: 201 }
+      { status: 201 },
     );
   } catch (error) {
     console.error("Erro ao criar usuário:", error);
@@ -96,7 +96,7 @@ export async function POST(request: NextRequest) {
         error: "Erro ao processar o cadastro",
         details: error instanceof Error ? error.message : "Erro desconhecido",
       },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

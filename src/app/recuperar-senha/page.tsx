@@ -1,10 +1,11 @@
-"use client"
+"use client";
 
-import Link from "next/link"
+import Link from "next/link";
 // Importe o componente de formulário específico para recuperação de senha
 // Crie este componente em um local como: ../_components/recuperar-senha-form.tsx
-import { RecuperarSenhaForm } from "../_components/recuperar-senha-form" 
-import { motion } from "framer-motion"
+import { RecuperarSenhaForm } from "../_components/recuperar-senha-form";
+import { motion } from "framer-motion";
+import { Suspense } from "react";
 
 export default function RecuperarSenhaPage() {
   return (
@@ -36,7 +37,12 @@ export default function RecuperarSenhaPage() {
               <div className="position-relative d-inline-block mb-3">
                 <div
                   className="position-absolute top-50 start-50 translate-middle rounded-circle bg-primary"
-                  style={{ width: "180px", height: "180px", filter: "blur(40px)", opacity: "0.2" }}
+                  style={{
+                    width: "180px",
+                    height: "180px",
+                    filter: "blur(40px)",
+                    opacity: "0.2",
+                  }}
                 ></div>
                 {/* Se você tiver uma logo específica para esta página, pode inserí-la aqui */}
               </div>
@@ -69,10 +75,16 @@ export default function RecuperarSenhaPage() {
               </div>
 
               {/* Link para Voltar ao Login */}
-              <div className="text-center mt-4" style={{ position: 'relative', zIndex: 10 }}>
+              <div
+                className="text-center mt-4"
+                style={{ position: "relative", zIndex: 10 }}
+              >
                 <p className="text-light">
                   Lembrou da senha?{" "}
-                  <Link href="/login" className="text-primary text-decoration-none fw-semibold hover-scale-sm">
+                  <Link
+                    href="/login"
+                    className="text-primary text-decoration-none fw-semibold hover-scale-sm"
+                  >
                     Voltar para o Login
                   </Link>
                 </p>
@@ -82,5 +94,5 @@ export default function RecuperarSenhaPage() {
         </div>
       </div>
     </div>
-  )
+  );
 }

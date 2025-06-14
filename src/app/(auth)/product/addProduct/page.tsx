@@ -8,7 +8,13 @@ import { z } from "zod";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 import { Camera, Loader2, ArrowLeft } from "lucide-react";
-import { Form, FormField, FormItem, FormControl, FormMessage } from "@/components/ui/form";
+import {
+  Form,
+  FormField,
+  FormItem,
+  FormControl,
+  FormMessage,
+} from "@/components/ui/form";
 
 const schema = z.object({
   name: z.string().min(1, "Nome do produto é obrigatório"),
@@ -92,7 +98,10 @@ export default function AddProductPage() {
 
         <div className="text-center mb-4">
           <div className="position-relative d-inline-block">
-            <div className="image-upload-area d-flex align-items-center justify-content-center" style={{ width: '200px', height: '200px' }}>
+            <div
+              className="image-upload-area d-flex align-items-center justify-content-center"
+              style={{ width: "200px", height: "200px" }}
+            >
               {previewUrl ? (
                 <Image
                   src={previewUrl}
@@ -104,7 +113,9 @@ export default function AddProductPage() {
               ) : (
                 <div className="text-center">
                   <Camera size={48} className="text-muted mb-2" />
-                  <p className="small text-muted mb-0">Clique para adicionar uma imagem</p>
+                  <p className="small text-muted mb-0">
+                    Clique para adicionar uma imagem
+                  </p>
                 </div>
               )}
               <input
