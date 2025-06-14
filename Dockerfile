@@ -33,11 +33,19 @@ RUN find src -name "*.tsx" -o -name "*.ts" -exec grep -l "Suspense" {} \; || ech
 RUN rm -rf .next
 RUN rm -rf node_modules/.cache
 
-# Define uma variável de ambiente com o timestamp do build
-ENV NEXT_PUBLIC_BUILD_ID=build-$(date +%s)
+# Gera um timestamp do build e o salva como variável de ambiente
+# O Docker não permite comandos shell diretamente em ENV, então geramos e usamos em etapas separadas
+RUN echo "build-$(date +%s)" > /tmp/build_id
 
-# Compila o projeto Next.js com um timestamp único para evitar problemas de cache
-RUN echo "Build iniciado em $(date) com ID ${NEXT_PUBLIC_BUILD_ID}" && yarn build
+# Compila o projeto Next.js com um timestamp único como BUILD_ID para evitar problemas de cache
+# Definimos a variável de ambiente aqui para que seja usada durante o build
+RUN export NEXT_PUBLIC_BUILD_ID=$(cat /tmp/build_id) && \
+    echo "Build iniciado em $(date) com ID $NEXT_PUBLIC_BUILD_ID" && \
+    yarn build
+
+# Define a variável de ambiente permanente com o mesmo valor usado no build
+# (será copiada para o estágio de produção no .env.production)
+RUN echo "NEXT_PUBLIC_BUILD_ID=$(cat /tmp/build_id)" >> .env
 
 # Estágio de produção - imagem mais leve
 FROM node:20.11-alpine3.19 AS runner

@@ -5,7 +5,10 @@
 
 import { useEffect, useState } from 'react';
 
-const BUILD_ID = process.env.NEXT_PUBLIC_BUILD_ID || Date.now().toString();
+// Gere um ID de build único usando um timestamp atual se a variável de ambiente não estiver disponível
+// Adicione um valor aleatório para garantir que cada cliente tenha um ID único
+const BUILD_ID = process.env.NEXT_PUBLIC_BUILD_ID ||
+    `build-${Date.now()}-${Math.floor(Math.random() * 1000).toString()}`;
 
 export default function VersionChecker() {
     const [shouldRefresh, setShouldRefresh] = useState(false);
@@ -29,12 +32,20 @@ export default function VersionChecker() {
 
         // Verifica periodicamente se há uma nova versão
         const checkInterval = setInterval(() => {
-            fetch('/_next/static/BUILD_ID?v=' + Date.now())
-                .then(response => response.text())
-                .then(latestBuildId => {
+            // Fazendo uma requisição para um arquivo estático com um parâmetro de cache-busting
+            // Isso vai verificar a versão atual do servidor comparando com a versão do cliente
+            fetch('/api/version?v=' + Date.now())
+                .then(response => response.json())
+                .then(data => {
+                    const latestBuildId = data?.buildId;
                     if (latestBuildId && latestBuildId !== BUILD_ID) {
-                        console.log('Nova versão disponível, solicita reload');
+                        console.log('Nova versão disponível:', latestBuildId, 'atual:', BUILD_ID);
                         setShouldRefresh(true);
+
+                        // Atualiza o buildId armazenado para a próxima comparação
+                        if (typeof window !== 'undefined') {
+                            localStorage.setItem('appBuildId', latestBuildId);
+                        }
                     }
                 })
                 .catch(err => console.log('Erro ao verificar versão:', err));

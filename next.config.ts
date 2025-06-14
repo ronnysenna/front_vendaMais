@@ -22,7 +22,8 @@ const nextConfig = {
   // Gera um ID de build único para cada deploy
   // Isso força os navegadores e CDNs a baixarem novas versões dos arquivos
   generateBuildId: async () => {
-    return `build-${Date.now()}`;
+    // Use a variável de ambiente se disponível, ou gere um timestamp no momento do build
+    return process.env.NEXT_PUBLIC_BUILD_ID || `build-${Date.now()}`;
   },
   // Otimiza o cache para garantir conteúdo mais recente
   onDemandEntries: {
