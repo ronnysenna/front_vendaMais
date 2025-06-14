@@ -102,5 +102,5 @@ USER nextjs
 HEALTHCHECK --interval=30s --timeout=30s --start-period=5s --retries=3 \
     CMD wget --no-verbose --tries=1 --spider http://localhost:3000/ || exit 1
 
-# Inicia o servidor Next.js
-CMD ["yarn", "start"]
+# Inicia o servidor Next.js (sem depender de dotenv-cli)
+CMD ["node_modules/.bin/next", "start"]

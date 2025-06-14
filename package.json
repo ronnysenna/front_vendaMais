@@ -3,10 +3,11 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "NODE_ENV=development dotenv -e .env -- next dev",
-    "build": "NODE_ENV=production dotenv -e .env -- next build",
-    "build:clean": "rm -rf .next && NODE_ENV=production dotenv -e .env -- next build",
-    "start": "NODE_ENV=production dotenv -e .env -- next start",
+    "dev": "NODE_ENV=development next dev",
+    "build": "NODE_ENV=production next build",
+    "build:clean": "rm -rf .next && NODE_ENV=production next build",
+    "start": "NODE_ENV=production next start",
+    "start:with-env": "NODE_ENV=production dotenv -e .env -- next start",
     "rebuild:full": "./scripts/clean-rebuild.sh",
     "lint": "next lint",
     "generate": "prisma generate",
@@ -28,7 +29,8 @@
     "cache:clear": "rm -rf .next/cache",
     "cache:clean": "chmod +x ./scripts/clean-caches.sh && ./scripts/clean-caches.sh",
     "cache:clean:all": "chmod +x ./scripts/clean-caches.sh && ./scripts/clean-caches.sh --all",
-    "update:buildid": "chmod +x ./scripts/update-build-id.sh && ./scripts/update-build-id.sh"
+    "update:buildid": "chmod +x ./scripts/update-build-id.sh && ./scripts/update-build-id.sh",
+    "start:server": "chmod +x ./scripts/start-server.sh && ./scripts/start-server.sh"
   },
   "dependencies": {
     "@hookform/resolvers": "^5.0.1",
