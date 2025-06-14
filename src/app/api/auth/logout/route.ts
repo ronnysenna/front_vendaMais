@@ -3,8 +3,14 @@ import { cookies } from "next/headers";
 
 export async function POST() {
   try {
-    // Criar uma resposta com status 200
-    const response = NextResponse.json({ success: true }, { status: 200 });
+    // Criar uma resposta com status 200 e incluir URL de redirecionamento
+    const response = NextResponse.json(
+      {
+        success: true,
+        redirectUrl: "/",
+      },
+      { status: 200 }
+    );
 
     // Lista de possíveis cookies de autenticação
     const authCookies = [
@@ -42,6 +48,12 @@ export async function POST() {
     return response;
   } catch (error) {
     console.error("Erro ao fazer logout:", error);
-    return NextResponse.json({ error: "Falha ao deslogar" }, { status: 500 });
+    return NextResponse.json(
+      {
+        error: "Falha ao deslogar",
+        redirectUrl: "/", // Mesmo com erro, indicamos redirecionamento para a página inicial
+      },
+      { status: 500 }
+    );
   }
 }

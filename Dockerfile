@@ -18,10 +18,11 @@ RUN npx prisma generate
 # Copia o restante dos arquivos de código-fonte
 COPY . .
 
-# Verifica se arquivo .env.production existe
-RUN if [ ! -f .env.production ]; then \
-    echo "Aviso: Arquivo .env.production não encontrado. Criando arquivo vazio." && \
-    touch .env.production; \
+# Verifica se arquivo .env existe
+RUN if [ ! -f .env ]; then \
+    echo "Aviso: Arquivo .env não encontrado. Criando arquivo vazio." && \
+    touch .env && \
+    echo "NODE_ENV=production" >> .env; \
     fi
 
 # Verifica a presença de useSearchParams() e Suspense - usando find + grep para compatibilidade Alpine

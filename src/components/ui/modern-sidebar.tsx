@@ -13,7 +13,7 @@ import {
   ChevronUp,
   SearchIcon,
 } from "lucide-react";
-import { ButtonSignOutSimple } from "./button-signout-simple";
+import { ButtonSignOut } from "./button-signout";
 
 export function ModernSidebar({ userName }: { userName: string }) {
   const [isOpen, setIsOpen] = useState(false);
@@ -97,7 +97,7 @@ export function ModernSidebar({ userName }: { userName: string }) {
 
       {/* Botão Sair */}
       <div className="p-3 border-top">
-        <ButtonSignOutSimple />
+        <ButtonSignOut />
       </div>
     </div>
   );

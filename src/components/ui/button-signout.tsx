@@ -19,16 +19,18 @@ export function ButtonSignOut() {
       });
 
       if (response.ok) {
-        router.replace("/login");
+        const data = await response.json();
+        const redirectUrl = data.redirectUrl || "/";
+        router.replace(redirectUrl);
       } else {
         console.error("Erro ao fazer logout:", response.statusText);
-        // Mesmo com erro, redireciona para tela de login
-        router.replace("/login");
+        // Mesmo com erro, redireciona para a página inicial
+        router.replace("/");
       }
     } catch (error) {
       console.error("Erro ao fazer logout:", error);
       // Redirecionamento forçado em caso de erro
-      router.replace("/login");
+      router.replace("/");
     }
   }
 
