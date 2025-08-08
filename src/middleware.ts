@@ -35,6 +35,7 @@ export async function middleware(request: NextRequest) {
 
   // Rotas públicas (acessíveis sem autenticação)
   const publicRoutes = [
+    "/", // Torna a home pública
     "/login",
     "/signup",
     "/recuperar-senha",
