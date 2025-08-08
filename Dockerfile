@@ -20,7 +20,7 @@ COPY prisma ./prisma/
 RUN yarn install --immutable --ignore-engines || npm install --legacy-peer-deps --no-fund --no-audit
 
 # Garantir que todas as dependências do Tailwind estejam instaladas corretamente
-# Usar versões específicas e compatíveis (tailwindcss v3.3.5 é mais estável com Next.js 14)
+# Usar versões específicas e compatíveis
 RUN npm install -D tailwindcss@3.3.5 postcss@8.4.31 autoprefixer@10.4.16
 
 # Caso falhe, tenta com abordagem alternativa
@@ -31,25 +31,17 @@ RUN if [ $? -ne 0 ]; then \
     npm install -D tailwindcss@3.3.5 postcss@8.4.31 autoprefixer@10.4.16 --legacy-peer-deps; \
     fi
 
-# Verificar que os módulos estão instalados corretamente
-RUN ls -la node_modules/tailwindcss || echo "tailwindcss não encontrado!"
-RUN ls -la node_modules/postcss || echo "postcss não encontrado!"
-RUN ls -la node_modules/autoprefixer || echo "autoprefixer não encontrado!"
-
 # Garante que as dependências do SWC estejam instaladas (necessário para o Next.js)
 RUN npm install --no-save @next/swc-linux-x64-musl @next/swc-linux-x64-gnu || true
 
 # Gera Prisma Client
 RUN npx prisma generate
 
-# Copia o script de correção do Tailwind primeiro
-COPY scripts/fix-tailwind-docker.sh ./scripts/
-
-# Copia o restante dos arquivos de código-fonte
+# Copia todo o código-fonte
 COPY . .
 
-# Executa o script de correção do Tailwind
-RUN chmod +x ./scripts/fix-tailwind-docker.sh && ./scripts/fix-tailwind-docker.sh
+# Criação do arquivo postcss.config.js
+RUN echo "module.exports = { plugins: { tailwindcss: {}, autoprefixer: {} } }" > postcss.config.js
 
 # Verifica se arquivo .env existe
 RUN if [ ! -f .env ]; then \
@@ -58,49 +50,24 @@ RUN if [ ! -f .env ]; then \
     echo "NODE_ENV=production" >> .env; \
     fi
 
-# Verifica a presença de useSearchParams() e Suspense - usando find + grep para compatibilidade Alpine
-RUN find src -name "*.tsx" -o -name "*.ts" -exec grep -l "useSearchParams" {} \; || echo "Nenhum useSearchParams encontrado"
-RUN find src -name "*.tsx" -o -name "*.ts" -exec grep -l "Suspense" {} \; || echo "Nenhum Suspense encontrado"
-
 # Limpa o cache do Next.js antes do build para garantir uma compilação limpa
 RUN rm -rf .next
 RUN rm -rf node_modules/.cache
 
 # Gera um timestamp do build e o salva como variável de ambiente
-# O Docker não permite comandos shell diretamente em ENV, então geramos e usamos em etapas separadas
 RUN echo "build-$(date +%s)" > /tmp/build_id
 
 # Adiciona o build ID ao arquivo .env antes de compilar
 RUN BUILD_ID=$(cat /tmp/build_id) && \
     echo "NEXT_PUBLIC_BUILD_ID=$BUILD_ID" >> .env && \
-    # Substituir a URL do app para produção se estivermos em produção
     if [ "$NODE_ENV" = "production" ]; then \
     sed -i 's|NEXT_PUBLIC_APP_URL=http://localhost:3000|NEXT_PUBLIC_APP_URL=https://agenda-ai.ronnysenna.com.br|g' .env; \
-    fi && \
-    echo "Build ID gerado: $BUILD_ID" && \
-    echo "Conteúdo do arquivo .env:" && \
-    cat .env
-
-# Verificar arquivos de configuração antes de iniciar o build
-RUN echo "Verificando arquivos de configuração importantes..." && \
-    cat postcss.config.mjs && \
-    echo "---" && \
-    if [ -f tailwind.config.js ]; then \
-    echo "Usando tailwind.config.js"; \
-    cat tailwind.config.js | head -n 10; \
-    elif [ -f tailwind.config.ts ]; then \
-    echo "Usando tailwind.config.ts"; \
-    cat tailwind.config.ts | head -n 10; \
-    else \
-    echo "ERRO: Nenhum arquivo de configuração do Tailwind encontrado!"; \
-    exit 1; \
     fi
 
-# Compila o projeto Next.js com o timestamp único definido no .env
+# Compila o projeto Next.js
 RUN echo "Build iniciado em $(date)" && \
-    echo "Verificando dependências do Tailwind instaladas..." && \
-    npm list tailwindcss postcss autoprefixer && \
     NODE_ENV=production npm run build
+
 RUN echo "NEXT_PUBLIC_BUILD_ID=$(cat /tmp/build_id)" >> .env
 
 # Estágio de produção - imagem mais leve
@@ -122,9 +89,7 @@ COPY --from=builder /app/next.config.* ./
 COPY --from=builder /app/public ./public
 COPY --from=builder /app/package.json ./
 COPY --from=builder /app/.npmrc ./
-# Copia o yarn.lock se existir
 COPY --from=builder /app/yarn.lock* ./
-# Copia o package-lock.json se existir
 COPY --from=builder /app/package-lock.json* ./
 COPY --from=builder /app/.next ./.next
 COPY --from=builder /app/prisma ./prisma
@@ -132,9 +97,8 @@ COPY --from=builder /app/.env* ./
 
 # Adiciona configurações para melhor desempenho
 ENV NODE_OPTIONS="--max-old-space-size=4096"
-ENV NEXT_SHARP_PATH="/app/node_modules/sharp"
 
-# Instala apenas dependências de produção com estratégia resiliente
+# Instala apenas dependências de produção
 RUN if [ -f yarn.lock ]; then \
     yarn install --immutable --production --ignore-engines || npm install --production --legacy-peer-deps --no-fund --no-audit; \
     else \
@@ -153,7 +117,7 @@ RUN chown -R nextjs:nodejs /app
 # Muda para o usuário não-root
 USER nextjs
 
-# Saúde da aplicação - verifica a porta definida na variável PORT ou a 3000 por padrão
+# Saúde da aplicação
 HEALTHCHECK --interval=15s --timeout=30s --start-period=10s --retries=3 \
     CMD wget --no-verbose --tries=2 --spider http://localhost:${PORT:-3000}/ || exit 1
 
