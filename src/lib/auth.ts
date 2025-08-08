@@ -112,7 +112,7 @@ export const auth = betterAuth({
       }
     },
     // Hook para garantir robustez no login
-    onSignIn: async ({ email, password }) => {
+    onSignIn: async ({ email, password }: { email: string; password: string }) => {
       // Busca usuário e conta
       const user = await prisma.user.findUnique({ where: { email } });
       if (!user) {
