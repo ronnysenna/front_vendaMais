@@ -32,7 +32,7 @@ COPY --from=deps /app/src/generated ./src/generated
 COPY . .
 
 # Cria os arquivos de configuração para o Tailwind
-RUN echo 'module.exports = { plugins: { tailwindcss: {}, autoprefixer: {} } }' > postcss.config.js
+RUN echo 'module.exports = { plugins: { "@tailwindcss/postcss": {}, autoprefixer: {} } }' > postcss.config.js
 
 # Cria o build ID
 RUN echo "build-$(date +%s)" > /tmp/build_id
@@ -71,10 +71,6 @@ COPY --from=builder /app/package.json ./package.json
 COPY --from=builder /app/.env* ./
 COPY --from=builder /app/prisma ./prisma
 COPY --from=builder /app/src/generated ./src/generated
-COPY --from=builder /app/docker-entrypoint.sh ./docker-entrypoint.sh
-
-# Permissão de execução para o script de entrada
-RUN chmod +x ./docker-entrypoint.sh
 
 # Instala apenas as dependências de produção
 RUN yarn install --frozen-lockfile --production || \
@@ -95,6 +91,5 @@ EXPOSE 3000
 HEALTHCHECK --interval=30s --timeout=30s --start-period=10s --retries=3 \
     CMD wget -q --spider http://localhost:3000/ || exit 1
 
-# Inicia o servidor usando o script de entrada
-ENTRYPOINT ["/app/docker-entrypoint.sh"]
-CMD ["node_modules/.bin/next", "start", "-p", "3000"]
+# Inicia o servidor Next.js
+CMD ["npm", "run", "start"]

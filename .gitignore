@@ -42,6 +42,7 @@ dev-server.log
 .env*.local
 # Example env file que pode ser commitado
 !.env.example
+!.env.docker
 
 # vercel
 .vercel
