@@ -56,6 +56,10 @@ RUN echo "build-$(date +%s)" > /tmp/build_id
 # Adiciona o build ID ao arquivo .env antes de compilar
 RUN BUILD_ID=$(cat /tmp/build_id) && \
     echo "NEXT_PUBLIC_BUILD_ID=$BUILD_ID" >> .env && \
+    # Substituir a URL do app para produção se estivermos em produção
+    if [ "$NODE_ENV" = "production" ]; then \
+    sed -i 's|NEXT_PUBLIC_APP_URL=http://localhost:3000|NEXT_PUBLIC_APP_URL=https://agenda-ai.ronnysenna.com.br|g' .env; \
+    fi && \
     echo "Build ID gerado: $BUILD_ID" && \
     echo "Conteúdo do arquivo .env:" && \
     cat .env
