@@ -2,15 +2,28 @@
 # Estágio de construção
 FROM node:20.11-alpine3.19 AS builder
 
+# Configura variáveis de ambiente para ignorar verificações de versão do Node
+ENV NODE_OPTIONS=--dns-result-order=ipv4first
+ENV NEXT_TELEMETRY_DISABLED=1
+ENV NODE_ENV=production
+ENV YARN_IGNORE_NODE=1
+ENV NPM_CONFIG_ENGINE_STRICT=false
+
 # Define diretório de trabalho
 WORKDIR /app
 
 # Copia arquivos de configuração primeiro (melhor cache)
-COPY package.json yarn.lock ./
+COPY package.json yarn.lock .npmrc ./
 COPY prisma ./prisma/
 
-# Instala dependências
-RUN yarn install --immutable || npm install
+# Instala dependências com estratégia resiliente
+RUN yarn install --immutable --ignore-engines || npm install --legacy-peer-deps --no-fund --no-audit
+# Caso falhe, tenta com abordagem alternativa
+RUN if [ $? -ne 0 ]; then \
+    echo "Primeira tentativa falhou, tentando abordagem alternativa..." && \
+    rm -rf node_modules && \
+    npm install --legacy-peer-deps --force; \
+    fi
 
 # Gera Prisma Client
 RUN npx prisma generate
@@ -67,6 +80,7 @@ WORKDIR /app
 COPY --from=builder /app/next.config.* ./
 COPY --from=builder /app/public ./public
 COPY --from=builder /app/package.json ./
+COPY --from=builder /app/.npmrc ./
 # Copia o yarn.lock se existir
 COPY --from=builder /app/yarn.lock* ./
 # Copia o package-lock.json se existir
@@ -79,11 +93,11 @@ COPY --from=builder /app/.env* ./
 ENV NODE_OPTIONS="--max-old-space-size=4096"
 ENV NEXT_SHARP_PATH="/app/node_modules/sharp"
 
-# Instala apenas dependências de produção
+# Instala apenas dependências de produção com estratégia resiliente
 RUN if [ -f yarn.lock ]; then \
-    yarn install --immutable --production; \
+    yarn install --immutable --production --ignore-engines || npm install --production --legacy-peer-deps --no-fund --no-audit; \
     else \
-    npm ci --production; \
+    npm ci --production --legacy-peer-deps --no-fund --no-audit || npm install --production --legacy-peer-deps --force; \
     fi
 
 # Instala wget para o healthcheck
