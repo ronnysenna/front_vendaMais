@@ -1,125 +1,100 @@
-# Usando abordagem de multi-estágios para uma imagem de produção otimizada
-# Estágio de construção
-FROM node:20.11-alpine3.19 AS builder
+# Dockerfile simplificado para Next.js com Tailwind e Prisma
+FROM node:20.11-alpine AS base
 
-# Configura variáveis de ambiente para ignorar verificações de versão do Node
-ENV NODE_OPTIONS=--dns-result-order=ipv4first
-ENV NEXT_TELEMETRY_DISABLED=1
+# Configurações gerais
 ENV NODE_ENV=production
-ENV YARN_IGNORE_NODE=1
-ENV NPM_CONFIG_ENGINE_STRICT=false
+ENV NEXT_TELEMETRY_DISABLED=1
 
-# Define diretório de trabalho
+# Instalação de dependências
+FROM base AS deps
 WORKDIR /app
 
-# Copia arquivos de configuração primeiro (melhor cache)
-COPY package.json yarn.lock .npmrc ./
+# Copia arquivos de configuração para instalação eficiente das dependências
+COPY package.json yarn.lock* package-lock.json* ./
 COPY prisma ./prisma/
 
-# Instala dependências com estratégia resiliente
-RUN yarn install --immutable --ignore-engines || npm install --legacy-peer-deps --no-fund --no-audit
+# Instala as dependências de produção
+RUN yarn install --frozen-lockfile --production || \
+    npm ci --only=production
 
-# Garantir que todas as dependências do Tailwind estejam instaladas corretamente
-# Usar versões específicas e compatíveis
-RUN npm install -D tailwindcss@3.3.5 postcss@8.4.31 autoprefixer@10.4.16
-
-# Caso falhe, tenta com abordagem alternativa
-RUN if [ $? -ne 0 ]; then \
-    echo "Primeira tentativa falhou, tentando abordagem alternativa..." && \
-    rm -rf node_modules && \
-    npm install --legacy-peer-deps --force && \
-    npm install -D tailwindcss@3.3.5 postcss@8.4.31 autoprefixer@10.4.16 --legacy-peer-deps; \
-    fi
-
-# Garante que as dependências do SWC estejam instaladas (necessário para o Next.js)
-RUN npm install --no-save @next/swc-linux-x64-musl @next/swc-linux-x64-gnu || true
-
-# Gera Prisma Client
+# Gera o Prisma Client
 RUN npx prisma generate
 
-# Copia todo o código-fonte
+# Etapa de build
+FROM base AS builder
+WORKDIR /app
+
+# Copia as dependências da etapa anterior
+COPY --from=deps /app/node_modules ./node_modules
+COPY --from=deps /app/src/generated ./src/generated
+
+# Copia todo o código fonte
 COPY . .
 
-# Criação do arquivo postcss.config.js
-RUN echo "module.exports = { plugins: { tailwindcss: {}, autoprefixer: {} } }" > postcss.config.js
+# Cria os arquivos de configuração para o Tailwind
+RUN echo 'module.exports = { plugins: { tailwindcss: {}, autoprefixer: {} } }' > postcss.config.js
 
-# Verifica se arquivo .env existe
-RUN if [ ! -f .env ]; then \
-    echo "Aviso: Arquivo .env não encontrado. Criando arquivo vazio." && \
-    touch .env && \
-    echo "NODE_ENV=production" >> .env; \
-    fi
-
-# Limpa o cache do Next.js antes do build para garantir uma compilação limpa
-RUN rm -rf .next
-RUN rm -rf node_modules/.cache
-
-# Gera um timestamp do build e o salva como variável de ambiente
+# Cria o build ID
 RUN echo "build-$(date +%s)" > /tmp/build_id
 
-# Adiciona o build ID ao arquivo .env antes de compilar
-RUN BUILD_ID=$(cat /tmp/build_id) && \
-    echo "NEXT_PUBLIC_BUILD_ID=$BUILD_ID" >> .env && \
-    if [ "$NODE_ENV" = "production" ]; then \
-    sed -i 's|NEXT_PUBLIC_APP_URL=http://localhost:3000|NEXT_PUBLIC_APP_URL=https://agenda-ai.ronnysenna.com.br|g' .env; \
+# Configura URL de produção se necessário
+RUN if [ "$NODE_ENV" = "production" ]; then \
+    sed -i 's|NEXT_PUBLIC_APP_URL=http://localhost:3000|NEXT_PUBLIC_APP_URL=https://agenda-ai.ronnysenna.com.br|g' .env || echo "No .env file found"; \
     fi
 
-# Compila o projeto Next.js
-RUN echo "Build iniciado em $(date)" && \
-    NODE_ENV=production npm run build
+# Adiciona o build ID ao arquivo .env
+RUN if [ -f .env ]; then \
+    echo "NEXT_PUBLIC_BUILD_ID=$(cat /tmp/build_id)" >> .env; \
+    else \
+    echo "NODE_ENV=production" > .env && \
+    echo "NEXT_PUBLIC_BUILD_ID=$(cat /tmp/build_id)" >> .env; \
+    fi
 
-RUN echo "NEXT_PUBLIC_BUILD_ID=$(cat /tmp/build_id)" >> .env
+# Build do Next.js
+RUN yarn build || npm run build
 
-# Estágio de produção - imagem mais leve
-FROM node:20.11-alpine3.19 AS runner
+# Etapa de execução
+FROM base AS runner
+WORKDIR /app
 
-# Define variáveis de ambiente para produção
-ENV NODE_ENV=production
-ENV NEXT_TELEMETRY_DISABLED=1
-
-# Adiciona um usuário não-root para executar a aplicação
+# Adiciona usuário não-root para segurança
 RUN addgroup --system --gid 1001 nodejs && \
     adduser --system --uid 1001 nextjs
 
-# Define diretório de trabalho
-WORKDIR /app
+# Define diretório para armazenamento
+VOLUME /app/.next/cache
 
-# Copia arquivos necessários da etapa de construção
-COPY --from=builder /app/next.config.* ./
+# Copia os arquivos necessários para execução
 COPY --from=builder /app/public ./public
-COPY --from=builder /app/package.json ./
-COPY --from=builder /app/.npmrc ./
-COPY --from=builder /app/yarn.lock* ./
-COPY --from=builder /app/package-lock.json* ./
 COPY --from=builder /app/.next ./.next
-COPY --from=builder /app/prisma ./prisma
+COPY --from=builder /app/package.json ./package.json
 COPY --from=builder /app/.env* ./
+COPY --from=builder /app/prisma ./prisma
+COPY --from=builder /app/src/generated ./src/generated
+COPY --from=builder /app/docker-entrypoint.sh ./docker-entrypoint.sh
 
-# Adiciona configurações para melhor desempenho
-ENV NODE_OPTIONS="--max-old-space-size=4096"
+# Permissão de execução para o script de entrada
+RUN chmod +x ./docker-entrypoint.sh
 
-# Instala apenas dependências de produção
-RUN if [ -f yarn.lock ]; then \
-    yarn install --immutable --production --ignore-engines || npm install --production --legacy-peer-deps --no-fund --no-audit; \
-    else \
-    npm ci --production --legacy-peer-deps --no-fund --no-audit || npm install --production --legacy-peer-deps --force; \
-    fi
+# Instala apenas as dependências de produção
+RUN yarn install --frozen-lockfile --production || \
+    npm ci --only=production
 
-# Instala wget para o healthcheck
-RUN apk add --no-cache wget
+# Configura o ambiente para produção
+ENV PORT=3000
+ENV NODE_ENV=production
+ENV HOSTNAME="0.0.0.0"
 
-# Expõe tanto a porta 3000 quanto a 80 para compatibilidade
-EXPOSE 3000 80
-
-# Configura permissões corretas
-RUN chown -R nextjs:nodejs /app
-
-# Muda para o usuário não-root
+# Define usuário não-root
 USER nextjs
 
-# Saúde da aplicação
-HEALTHCHECK --interval=15s --timeout=30s --start-period=10s --retries=3 \
-    CMD wget --no-verbose --tries=2 --spider http://localhost:${PORT:-3000}/ || exit 1
+# Expõe a porta do servidor
+EXPOSE 3000
 
-# Inicia o servidor Next.js com configuração de porta
-CMD ["sh", "-c", "node_modules/.bin/next start -p ${PORT:-3000}"]
+# Healthcheck
+HEALTHCHECK --interval=30s --timeout=30s --start-period=10s --retries=3 \
+    CMD wget -q --spider http://localhost:3000/ || exit 1
+
+# Inicia o servidor usando o script de entrada
+ENTRYPOINT ["/app/docker-entrypoint.sh"]
+CMD ["node_modules/.bin/next", "start", "-p", "3000"]

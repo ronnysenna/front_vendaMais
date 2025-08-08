@@ -1,0 +1,63 @@
+# Dependências
+node_modules
+.pnp
+.pnp.js
+
+# Arquivos de build
+.next
+out
+build
+dist
+
+# Arquivos de ambiente local
+.env*.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# Logs
+logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Diretórios de cache
+.npm
+.eslintcache
+.vercel
+.turbo
+
+# Arquivos de sistema
+.DS_Store
+Thumbs.db
+
+# Scripts de desenvolvimento/debug
+scripts/
+docs/
+
+# Arquivos de teste
+__tests__
+__mocks__
+*.test.*
+*.spec.*
+
+# Arquivos de Docker
+Dockerfile*
+.dockerignore
+docker-compose*
+
+# Arquivos de desenvolvimento
+.git
+.github
+.gitlab
+.vscode
+.idea
+
+# Outros
+*.tsbuildinfo
+*.swp
+*.swo
+README.md
+LICENSE
+*.md
