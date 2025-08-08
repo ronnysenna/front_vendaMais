@@ -1,3 +1,8 @@
+require("dotenv").config({
+  path: require("fs").existsSync(".env.local") ? ".env.local" : ".env",
+});
+require("dotenv").config(); // fallback para .env
+
 import { PrismaClient } from "../src/generated/prisma/client";
 
 const prisma = new PrismaClient({

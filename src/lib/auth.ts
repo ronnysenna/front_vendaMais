@@ -1,6 +1,8 @@
 import { betterAuth } from "better-auth";
 import { prismaAdapter } from "better-auth/adapters/prisma";
 import { prisma } from "./prisma";
+const { v4: uuidv4 } = require("uuid");
+import bcrypt from "bcrypt";
 
 // Interface básica para o usuário da Better Auth
 interface BetterAuthUser {
@@ -44,8 +46,13 @@ export const auth = betterAuth({
     maxAge: 30 * 24 * 60 * 60,
   },
   onError: (error: Error, context: string) => {
-    console.error(`[Better Auth Error] Contexto: ${context}`, error);
-    // Implementar tratamento de erro específico se necessário
+    console.error(`[Better Auth Error] Contexto: ${context}`);
+    if (error instanceof Error) {
+      console.error("Mensagem de erro:", error.message);
+      console.error("Stack trace:", error.stack);
+    } else {
+      console.error("Erro desconhecido:", error);
+    }
   },
   emailAndPassword: {
     enabled: true,
@@ -60,21 +67,76 @@ export const auth = betterAuth({
       credentials,
     }: {
       user: BetterAuthUser;
-      credentials: { name?: string };
+      credentials: { name?: string; email?: string; password?: string };
     }) => {
       try {
-        if (credentials.name) {
-          // Atualiza o usuário com o nome fornecido
-          await prisma.user.update({
-            where: { id: user.id },
-            data: { name: credentials.name },
+        // Hash seguro da senha
+        const hashedPassword = credentials.password
+          ? await bcrypt.hash(credentials.password, 10)
+          : undefined;
+        // Fluxo robusto: cria/atualiza usuário e conta em transação
+        const result = await prisma.$transaction(async (tx) => {
+          // Atualiza nome se fornecido
+          let updatedUser = user;
+          if (credentials.name) {
+            updatedUser = await tx.user.update({
+              where: { id: user.id },
+              data: { name: credentials.name },
+            });
+          }
+          // Garante que a conta existe
+          let account = await tx.account.findFirst({
+            where: { accountId: user.email, providerId: "credentials" },
           });
-        }
-        return { user };
+          if (!account) {
+            account = await tx.account.create({
+              data: {
+                id: uuidv4(),
+                accountId: user.email,
+                providerId: "credentials",
+                userId: user.id,
+                password: hashedPassword,
+                createdAt: new Date(),
+                updatedAt: new Date(),
+              },
+            });
+          }
+          return { user: updatedUser, account };
+        });
+        return result;
       } catch (error) {
         console.error("Erro ao processar onSignUp:", error);
-        return { user };
+        throw new Error(
+          "Erro ao criar usuário e conta. Tente novamente ou entre em contato com o suporte."
+        );
       }
+    },
+    // Hook para garantir robustez no login
+    onSignIn: async ({ email, password }) => {
+      // Busca usuário e conta
+      const user = await prisma.user.findUnique({ where: { email } });
+      if (!user) {
+        throw new Error(
+          "Usuário não encontrado. Cadastre-se antes de fazer login."
+        );
+      }
+      const account = await prisma.account.findFirst({
+        where: { accountId: email, providerId: "credentials" },
+      });
+      if (!account) {
+        throw new Error(
+          "Conta de login não encontrada. Redefina sua senha ou entre em contato com o suporte."
+        );
+      }
+      // Verifica senha
+      const senhaCorreta =
+        password && account.password
+          ? await bcrypt.compare(password, account.password)
+          : false;
+      if (!senhaCorreta) {
+        throw new Error("Senha incorreta. Tente novamente.");
+      }
+      return { user, account };
     },
   },
   socialProviders: {
