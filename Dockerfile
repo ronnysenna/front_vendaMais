@@ -32,7 +32,7 @@ COPY --from=deps /app/src/generated ./src/generated
 COPY . .
 
 # Cria os arquivos de configuração para o Tailwind
-RUN echo 'module.exports = { plugins: { "@tailwindcss/postcss": {}, autoprefixer: {} } }' > postcss.config.js
+RUN echo 'module.exports = { plugins: { "tailwindcss": {}, autoprefixer: {} } }' > postcss.config.js
 
 # Cria o build ID
 RUN echo "build-$(date +%s)" > /tmp/build_id
