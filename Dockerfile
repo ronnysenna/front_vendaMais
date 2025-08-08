@@ -19,15 +19,22 @@ COPY prisma ./prisma/
 # Instala dependências com estratégia resiliente
 RUN yarn install --immutable --ignore-engines || npm install --legacy-peer-deps --no-fund --no-audit
 
-# Garantir que todas as dependências do Tailwind estejam instaladas
-RUN yarn add -D postcss autoprefixer tailwindcss || npm install -D postcss autoprefixer tailwindcss --legacy-peer-deps
+# Garantir que todas as dependências do Tailwind estejam instaladas corretamente
+# Usar versões específicas e compatíveis (tailwindcss v3.3.5 é mais estável com Next.js 14)
+RUN npm install -D tailwindcss@3.3.5 postcss@8.4.31 autoprefixer@10.4.16
 
 # Caso falhe, tenta com abordagem alternativa
 RUN if [ $? -ne 0 ]; then \
     echo "Primeira tentativa falhou, tentando abordagem alternativa..." && \
     rm -rf node_modules && \
-    npm install --legacy-peer-deps --force; \
+    npm install --legacy-peer-deps --force && \
+    npm install -D tailwindcss@3.3.5 postcss@8.4.31 autoprefixer@10.4.16 --legacy-peer-deps; \
     fi
+
+# Verificar que os módulos estão instalados corretamente
+RUN ls -la node_modules/tailwindcss || echo "tailwindcss não encontrado!"
+RUN ls -la node_modules/postcss || echo "postcss não encontrado!"
+RUN ls -la node_modules/autoprefixer || echo "autoprefixer não encontrado!"
 
 # Garante que as dependências do SWC estejam instaladas (necessário para o Next.js)
 RUN npm install --no-save @next/swc-linux-x64-musl @next/swc-linux-x64-gnu || true
@@ -35,8 +42,14 @@ RUN npm install --no-save @next/swc-linux-x64-musl @next/swc-linux-x64-gnu || tr
 # Gera Prisma Client
 RUN npx prisma generate
 
+# Copia o script de correção do Tailwind primeiro
+COPY scripts/fix-tailwind-docker.sh ./scripts/
+
 # Copia o restante dos arquivos de código-fonte
 COPY . .
+
+# Executa o script de correção do Tailwind
+RUN chmod +x ./scripts/fix-tailwind-docker.sh && ./scripts/fix-tailwind-docker.sh
 
 # Verifica se arquivo .env existe
 RUN if [ ! -f .env ]; then \
@@ -68,11 +81,26 @@ RUN BUILD_ID=$(cat /tmp/build_id) && \
     echo "Conteúdo do arquivo .env:" && \
     cat .env
 
+# Verificar arquivos de configuração antes de iniciar o build
+RUN echo "Verificando arquivos de configuração importantes..." && \
+    cat postcss.config.mjs && \
+    echo "---" && \
+    if [ -f tailwind.config.js ]; then \
+    echo "Usando tailwind.config.js"; \
+    cat tailwind.config.js | head -n 10; \
+    elif [ -f tailwind.config.ts ]; then \
+    echo "Usando tailwind.config.ts"; \
+    cat tailwind.config.ts | head -n 10; \
+    else \
+    echo "ERRO: Nenhum arquivo de configuração do Tailwind encontrado!"; \
+    exit 1; \
+    fi
+
 # Compila o projeto Next.js com o timestamp único definido no .env
 RUN echo "Build iniciado em $(date)" && \
-    # Garante que a configuração do PostCSS está correta antes do build
-    echo "Verificando configuração do PostCSS..." && \
-    NODE_ENV=production yarn build
+    echo "Verificando dependências do Tailwind instaladas..." && \
+    npm list tailwindcss postcss autoprefixer && \
+    NODE_ENV=production npm run build
 RUN echo "NEXT_PUBLIC_BUILD_ID=$(cat /tmp/build_id)" >> .env
 
 # Estágio de produção - imagem mais leve
