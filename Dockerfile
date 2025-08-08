@@ -14,8 +14,8 @@ COPY package.json yarn.lock* package-lock.json* ./
 COPY prisma ./prisma/
 
 # Instala as dependências de produção
-RUN yarn install --frozen-lockfile --production || \
-    npm ci --only=production
+RUN yarn install --production || \
+    npm install --production
 
 # Gera o Prisma Client
 RUN npx prisma generate
