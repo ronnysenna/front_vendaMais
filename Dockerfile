@@ -62,7 +62,7 @@ RUN BUILD_ID=$(cat /tmp/build_id) && \
 
 # Compila o projeto Next.js com o timestamp único definido no .env
 RUN echo "Build iniciado em $(date)" && \
-    yarn build
+    NODE_ENV=production yarn build
 RUN echo "NEXT_PUBLIC_BUILD_ID=$(cat /tmp/build_id)" >> .env
 
 # Estágio de produção - imagem mais leve
