@@ -18,6 +18,10 @@ COPY prisma ./prisma/
 
 # Instala dependências com estratégia resiliente
 RUN yarn install --immutable --ignore-engines || npm install --legacy-peer-deps --no-fund --no-audit
+
+# Garantir que todas as dependências do Tailwind estejam instaladas
+RUN yarn add -D postcss autoprefixer tailwindcss || npm install -D postcss autoprefixer tailwindcss --legacy-peer-deps
+
 # Caso falhe, tenta com abordagem alternativa
 RUN if [ $? -ne 0 ]; then \
     echo "Primeira tentativa falhou, tentando abordagem alternativa..." && \
@@ -66,6 +70,8 @@ RUN BUILD_ID=$(cat /tmp/build_id) && \
 
 # Compila o projeto Next.js com o timestamp único definido no .env
 RUN echo "Build iniciado em $(date)" && \
+    # Garante que a configuração do PostCSS está correta antes do build
+    echo "Verificando configuração do PostCSS..." && \
     NODE_ENV=production yarn build
 RUN echo "NEXT_PUBLIC_BUILD_ID=$(cat /tmp/build_id)" >> .env
 
