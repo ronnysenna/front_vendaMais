@@ -25,6 +25,9 @@ RUN if [ $? -ne 0 ]; then \
     npm install --legacy-peer-deps --force; \
     fi
 
+# Garante que as dependências do SWC estejam instaladas (necessário para o Next.js)
+RUN npm install --no-save @next/swc-linux-x64-musl @next/swc-linux-x64-gnu || true
+
 # Gera Prisma Client
 RUN npx prisma generate
 
