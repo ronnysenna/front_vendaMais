@@ -13,9 +13,9 @@ WORKDIR /app
 COPY package.json yarn.lock* package-lock.json* ./
 COPY prisma ./prisma/
 
-# Instala as dependências de produção
-RUN yarn install --production || \
-    npm install --production
+# Instala todas as dependências
+RUN yarn install || \
+    npm install
 
 # Gera o Prisma Client
 RUN npx prisma generate
