@@ -20,6 +20,12 @@ const schema = z.object({
   cpfCnpj: z.string().optional(),
   address: z.string().optional(),
   image: z.any().optional(),
+
+  // Campos de preferências de agendamento
+  appointmentBuffer: z.number().min(0).optional().default(15),
+  allowClientCancellation: z.boolean().optional().default(true),
+  confirmationRequired: z.boolean().optional().default(false),
+  sendWhatsAppConfirmation: z.boolean().optional().default(true),
 });
 
 type ProfileFormData = z.infer<typeof schema>;
@@ -32,13 +38,17 @@ export default function ProfilePage() {
   const [successMessage, setSuccessMessage] = useState("");
   const [showFeedback, setShowFeedback] = useState(false);
 
-  const form = useForm<ProfileFormData>({
-    resolver: zodResolver(schema),
+  const form = useForm<any>({
+    resolver: zodResolver(schema) as any,
     defaultValues: {
       name: "",
       phone: "",
       cpfCnpj: "",
       address: "",
+      appointmentBuffer: 15,
+      allowClientCancellation: true,
+      confirmationRequired: false,
+      sendWhatsAppConfirmation: true
     },
   });
 
@@ -172,9 +182,8 @@ export default function ProfilePage() {
                 </div>
                 <button
                   type="button"
-                  className={`btn d-flex align-items-center justify-content-center gap-2 w-100 w-md-auto hover-scale ${
-                    isEditing ? "btn-secondary" : "btn-primary"
-                  }`}
+                  className={`btn d-flex align-items-center justify-content-center gap-2 w-100 w-md-auto hover-scale ${isEditing ? "btn-secondary" : "btn-primary"
+                    }`}
                   onClick={() => setIsEditing(!isEditing)}
                 >
                   {isEditing ? (

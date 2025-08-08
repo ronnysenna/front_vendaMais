@@ -13,6 +13,9 @@ import {
   Check,
   CaretRight,
   Sparkle,
+  Clock,
+  Calendar,
+  Scissors,
 } from "@phosphor-icons/react";
 
 interface HomeContentProps {
@@ -48,7 +51,7 @@ export function HomeContent({ isLoggedIn = false }: HomeContentProps) {
                 </span>
 
                 <h1 className="display-4 fw-bold mb-4">
-                  Transforme seu WhatsApp em uma
+                  Transforme seu WhatsApp em um
                   <motion.span
                     className="d-inline-block position-relative text-primary"
                     initial={{ opacity: 0 }}
@@ -56,7 +59,7 @@ export function HomeContent({ isLoggedIn = false }: HomeContentProps) {
                     transition={{ delay: 0.2, duration: 0.5 }}
                   >
                     {" "}
-                    Máquina de Vendas
+                    Sistema de Agendamento
                     <motion.span
                       className="position-absolute bottom-0 start-0 w-100 h-2 bg-primary opacity-25 rounded"
                       initial={{ width: 0 }}
@@ -67,8 +70,8 @@ export function HomeContent({ isLoggedIn = false }: HomeContentProps) {
                 </h1>
 
                 <p className="lead mb-4 text-secondary">
-                  Automatize seu atendimento, organize seus produtos e aumente
-                  suas vendas com nossa plataforma completa de gestão de vendas
+                  Automatize seu atendimento, gerencie sua agenda e aumente
+                  seus agendamentos com nossa plataforma completa de gestão de serviços
                   via WhatsApp.
                 </p>
 
@@ -160,7 +163,7 @@ export function HomeContent({ isLoggedIn = false }: HomeContentProps) {
                       ></div>
                     </div>
                     <div className="small text-center w-100 text-secondary">
-                      Venda Mais - Dashboard
+                      Agenda AI - Dashboard
                     </div>
                   </div>
 
@@ -172,10 +175,10 @@ export function HomeContent({ isLoggedIn = false }: HomeContentProps) {
                             className="rounded-circle bg-primary bg-opacity-10 d-flex align-items-center justify-content-center text-primary"
                             style={{ width: "40px", height: "40px" }}
                           >
-                            VM
+                            AI
                           </div>
                           <div>
-                            <div className="fw-medium">Venda Mais</div>
+                            <div className="fw-medium">Agenda AI</div>
                             <div className="small text-secondary">
                               Dashboard
                             </div>
@@ -189,14 +192,14 @@ export function HomeContent({ isLoggedIn = false }: HomeContentProps) {
                       <div className="row g-3">
                         {[
                           {
-                            label: "Vendas Hoje",
-                            value: "R$ 1.250",
-                            change: "+12%",
+                            label: "Agendamentos Hoje",
+                            value: "12",
+                            change: "+15%",
                           },
                           {
-                            label: "Clientes Ativos",
-                            value: "38",
-                            change: "+5%",
+                            label: "Taxa de Ocupação",
+                            value: "85%",
+                            change: "+8%",
                           },
                           {
                             label: "Taxa de Resposta",
@@ -355,14 +358,14 @@ export function HomeContent({ isLoggedIn = false }: HomeContentProps) {
                               className="bg-light rounded mb-2 d-flex align-items-center justify-content-center"
                               style={{ height: "100px" }}
                             >
-                              <ShoppingBag
+                              <Clock
                                 size={32}
                                 className="text-secondary opacity-25"
                               />
                             </div>
-                            <div className="small fw-medium">Produto {i}</div>
+                            <div className="small fw-medium">Serviço {i}</div>
                             <div className="small text-secondary">
-                              R$ {(i * 49.9).toFixed(2)}
+                              {30 + (i * 15)}min • R$ {(i * 59.9).toFixed(2)}
                             </div>
                           </div>
                         </div>
@@ -786,14 +789,14 @@ export function HomeContent({ isLoggedIn = false }: HomeContentProps) {
                 </li>
                 <li className="d-flex mb-2">
                   <span className="me-2">✉️</span>
-                  <span>contato@vendamais.com.br</span>
+                  <span>contato@agenda-ai.com.br</span>
                 </li>
               </ul>
             </div>
           </div>
           <div className="border-top border-secondary mt-4 pt-4 text-center">
             <p className="small text-white opacity-75 mb-0">
-              &copy; {new Date().getFullYear()} Venda Mais. Todos os direitos
+              &copy; {new Date().getFullYear()} Agenda AI. Todos os direitos
               reservados.
             </p>
           </div>

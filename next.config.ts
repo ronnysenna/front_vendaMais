@@ -1,5 +1,12 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  // Desabilitar o cache para garantir que sempre obtenha o conteúdo mais recente durante desenvolvimento
+  reactStrictMode: true,
+
+  // Configuração para URLs dinâmicas e diretório de saída personalizado
+  distDir: ".next",
+
+  // Configuração de imagens remotas
   images: {
     remotePatterns: [
       {
@@ -9,11 +16,25 @@ const nextConfig = {
       },
       {
         protocol: "https",
-        hostname: "vendamais.ronnysenna.com.br",
+        hostname: "agenda-ai.ronnysenna.com.br",
+        pathname: "/**",
+      },
+      {
+        protocol: "https",
+        hostname: "developers.google.com",
         pathname: "/**",
       },
     ],
+    domains: [
+      "res.cloudinary.com",
+      "agenda-ai.ronnysenna.com.br",
+      "developers.google.com",
+    ],
   },
+
+  // Configurações para melhorar o carregamento de arquivos estáticos
+  poweredByHeader: false,
+  compress: true,
   env: {
     NEXT_PUBLIC_N8N_WEBHOOK_URL: process.env.NEXT_PUBLIC_N8N_WEBHOOK_URL,
     NEXT_PUBLIC_EVOLUTION_WEBHOOK_URL:

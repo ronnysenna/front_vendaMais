@@ -20,9 +20,40 @@ export const auth = betterAuth({
     provider: "postgresql",
   }),
   trustedOrigins: getTrustedOrigins(),
+  // Configuração mais segura para tokens e sessões
+  tokenOptions: {
+    // Aumentar a segurança do token e reduzir erros
+    accessToken: {
+      expiresIn: "24h", // Aumentando para 24h para reduzir problemas de sessão
+    },
+    refreshToken: {
+      expiresIn: "30d", // 30 dias para token de refresh
+    },
+  },
+  sessionOptions: {
+    // Configuração da sessão mais segura com cookies
+    cookie: {
+      name: "auth_session", // Definindo nome do cookie explicitamente
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "lax" as const,
+      path: "/",
+      httpOnly: true,
+      maxAge: 30 * 24 * 60 * 60, // 30 dias em segundos
+    },
+    // Tempo máximo de expiração da sessão (30 dias)
+    maxAge: 30 * 24 * 60 * 60,
+  },
+  onError: (error: Error, context: string) => {
+    console.error(`[Better Auth Error] Contexto: ${context}`, error);
+    // Implementar tratamento de erro específico se necessário
+  },
   emailAndPassword: {
     enabled: true,
     requireVerification: false,
+    // Configuração para validação de senha
+    passwordOptions: {
+      minLength: 6, // Mínimo de 6 caracteres para a senha
+    },
     // Hook para salvar o nome do usuário durante o cadastro
     onSignUp: async ({
       user,
@@ -31,14 +62,19 @@ export const auth = betterAuth({
       user: BetterAuthUser;
       credentials: { name?: string };
     }) => {
-      if (credentials.name) {
-        // Atualiza o usuário com o nome fornecido
-        await prisma.user.update({
-          where: { id: user.id },
-          data: { name: credentials.name },
-        });
+      try {
+        if (credentials.name) {
+          // Atualiza o usuário com o nome fornecido
+          await prisma.user.update({
+            where: { id: user.id },
+            data: { name: credentials.name },
+          });
+        }
+        return { user };
+      } catch (error) {
+        console.error("Erro ao processar onSignUp:", error);
+        return { user };
       }
-      return { user };
     },
   },
   socialProviders: {

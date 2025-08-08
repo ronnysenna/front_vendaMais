@@ -7,7 +7,9 @@ import {
   HomeIcon,
   UserIcon,
   QrCodeIcon,
-  PackageIcon,
+  CalendarIcon,
+  ClockIcon,
+  ScissorsIcon,
   PlusCircleIcon,
   ChevronDown,
   ChevronUp,
@@ -17,7 +19,7 @@ import { ButtonSignOut } from "./button-signout";
 
 export function ModernSidebar({ userName }: { userName: string }) {
   const [isOpen, setIsOpen] = useState(false);
-  const [openProductsMenu, setOpenProductsMenu] = useState(false);
+  const [openServicesMenu, setOpenServicesMenu] = useState(false);
 
   const MenuContent = () => (
     <div className="d-flex flex-column h-100">
@@ -25,8 +27,8 @@ export function ModernSidebar({ userName }: { userName: string }) {
       <div className="p-4 border-bottom">
         <div className="text-center mb-3">
           <Image
-            src="/images/logo.png"
-            alt="Logo"
+            src="/images/logo.svg"
+            alt="Agenda AI Logo"
             width={80}
             height={80}
             className="img-fluid"
@@ -59,39 +61,55 @@ export function ModernSidebar({ userName }: { userName: string }) {
             <QrCodeIcon size={18} /> Gerar QR Code
           </Link>
 
-          {/* Menu Produtos com Submenu */}
+          {/* Menu Serviços com Submenu */}
           <div className="mb-2">
             <button
-              onClick={() => setOpenProductsMenu(!openProductsMenu)}
+              onClick={() => setOpenServicesMenu(!openServicesMenu)}
               className="nav-link text-light d-flex align-items-center justify-content-between w-100 border-0 bg-transparent"
             >
               <span className="d-flex align-items-center gap-2">
-                <PackageIcon size={18} /> Produtos
+                <ScissorsIcon size={18} /> Serviços
               </span>
-              {openProductsMenu ? (
+              {openServicesMenu ? (
                 <ChevronUp size={16} />
               ) : (
                 <ChevronDown size={16} />
               )}
             </button>
 
-            <div className={`collapse ${openProductsMenu ? "show" : ""}`}>
+            <div className={`collapse ${openServicesMenu ? "show" : ""}`}>
               <div className="ms-4 mt-2">
                 <Link
-                  href="/product/catalog"
+                  href="/service/catalog"
                   className="nav-link text-light d-flex align-items-center gap-2 mb-2"
                 >
-                  <SearchIcon size={16} /> Pesquisar
+                  <SearchIcon size={16} /> Listar Serviços
                 </Link>
                 <Link
-                  href="/product/addProduct"
+                  href="/service/addService"
                   className="nav-link text-light d-flex align-items-center gap-2"
                 >
-                  <PlusCircleIcon size={16} /> Adicionar
+                  <PlusCircleIcon size={16} /> Adicionar Serviço
                 </Link>
               </div>
             </div>
           </div>
+
+          {/* Calendário */}
+          <Link
+            href="/calendar"
+            className="nav-link text-light d-flex align-items-center gap-2 mb-2"
+          >
+            <CalendarIcon size={18} /> Calendário
+          </Link>
+
+          {/* Disponibilidade */}
+          <Link
+            href="/availability"
+            className="nav-link text-light d-flex align-items-center gap-2 mb-2"
+          >
+            <ClockIcon size={18} /> Disponibilidade
+          </Link>
         </div>
       </nav>
 

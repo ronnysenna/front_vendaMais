@@ -54,7 +54,7 @@ export default function LoginPage() {
                 />*/}
               </div>
               <h1 className="display-6 fw-bold text-white mb-2">
-                Bem-vindo ao <span className="text-primary">VendaMais</span>
+                Bem-vindo ao <span className="text-primary">AgendaAI</span>
               </h1>
               <p className="text-light-emphasis mb-4">
                 Entre com suas credenciais para acessar sua conta

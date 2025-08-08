@@ -25,6 +25,12 @@ model User {
   accounts         Account[]
   sessions         Session[]
 
+  // Novos relacionamentos para o AgendaAI
+  services      Service[]
+  timeSlots     TimeSlot[]
+  appointments  Appointment[]
+  businessHours BusinessHours?
+
   @@map("user")
 }
 
@@ -70,4 +76,87 @@ model Verification {
   updatedAt  DateTime?
 
   @@map("verification")
+}
+
+// Novos modelos para o AgendaAI
+
+model Service {
+  id          String   @id @default(uuid())
+  name        String
+  description String?
+  duration    Int // em minutos
+  price       Float?
+  imageUrl    String?
+  userId      String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  user        User     @relation(fields: [userId], references: [id])
+
+  appointments Appointment[]
+
+  @@map("service")
+}
+
+model TimeSlot {
+  id          String   @id @default(uuid())
+  userId      String
+  startTime   DateTime
+  endTime     DateTime
+  isAvailable Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  user        User     @relation(fields: [userId], references: [id])
+
+  @@map("time_slot")
+}
+
+model Appointment {
+  id          String            @id @default(uuid())
+  userId      String
+  serviceId   String
+  clientName  String
+  clientPhone String
+  clientEmail String?
+  startTime   DateTime
+  endTime     DateTime
+  status      AppointmentStatus @default(SCHEDULED)
+  notes       String?
+  createdAt   DateTime          @default(now())
+  updatedAt   DateTime          @updatedAt
+
+  user    User    @relation(fields: [userId], references: [id])
+  service Service @relation(fields: [serviceId], references: [id])
+
+  @@map("appointment")
+}
+
+model BusinessHours {
+  id     String @id @default(uuid())
+  userId String @unique
+  user   User   @relation(fields: [userId], references: [id])
+
+  mondayStart    String?
+  mondayEnd      String?
+  tuesdayStart   String?
+  tuesdayEnd     String?
+  wednesdayStart String?
+  wednesdayEnd   String?
+  thursdayStart  String?
+  thursdayEnd    String?
+  fridayStart    String?
+  fridayEnd      String?
+  saturdayStart  String?
+  saturdayEnd    String?
+  sundayStart    String?
+  sundayEnd      String?
+
+  @@map("business_hours")
+}
+
+enum AppointmentStatus {
+  SCHEDULED
+  CONFIRMED
+  COMPLETED
+  CANCELLED
+  NO_SHOW
 }

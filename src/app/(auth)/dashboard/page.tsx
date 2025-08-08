@@ -1,5 +1,14 @@
 import { getProtectedSession } from "@/lib/get-protected-session";
-import { ChartBar, Package2, QrCode, Users } from "lucide-react";
+import {
+  CalendarCheck,
+  CheckCircle,
+  Clock,
+  QrCode,
+  Users,
+  Calendar,
+  BadgeX,
+  Repeat
+} from "lucide-react";
 
 export default async function Dashboard() {
   const session = await getProtectedSession();
@@ -11,7 +20,7 @@ export default async function Dashboard() {
         <div>
           <h1 className="h3 mb-1 fw-bold gradient-number">Dashboard</h1>
           <p className="text-muted mb-0">
-            Visualize suas métricas em tempo real
+            Visualize métricas de agendamentos em tempo real
           </p>
         </div>
         <div className="d-flex align-items-center gap-3">
@@ -46,15 +55,15 @@ export default async function Dashboard() {
             <div className="card-body">
               <div className="d-flex align-items-center mb-3">
                 <div className="icon-glass p-3 rounded-4 me-3">
-                  <Package2 className="text-primary" size={24} />
+                  <CalendarCheck className="text-primary" size={24} />
                 </div>
                 <h6 className="card-title text-primary mb-0 fw-semibold">
-                  Total de Produtos
+                  Total de Agendamentos
                 </h6>
               </div>
-              <h3 className="mb-0 gradient-number display-6">0</h3>
+              <h3 className="mb-0 gradient-number display-6">42</h3>
               <small className="text-muted fw-medium">
-                Produtos cadastrados
+                Nos últimos 30 dias
               </small>
             </div>
           </div>
@@ -65,14 +74,14 @@ export default async function Dashboard() {
             <div className="card-body">
               <div className="d-flex align-items-center mb-3">
                 <div className="icon-glass p-3 rounded-4 me-3">
-                  <ChartBar className="text-success" size={24} />
+                  <CheckCircle className="text-success" size={24} />
                 </div>
                 <h6 className="card-title text-success mb-0 fw-semibold">
-                  Vendas do Mês
+                  Taxa de Comparecimento
                 </h6>
               </div>
-              <h3 className="mb-0 gradient-number display-6">0</h3>
-              <small className="text-muted fw-medium">Vendas realizadas</small>
+              <h3 className="mb-0 gradient-number display-6">87%</h3>
+              <small className="text-muted fw-medium">Clientes presentes</small>
             </div>
           </div>
         </div>
@@ -85,11 +94,11 @@ export default async function Dashboard() {
                   <QrCode className="text-info" size={24} />
                 </div>
                 <h6 className="card-title text-info mb-0 fw-semibold">
-                  QR Codes
+                  Conexões WhatsApp
                 </h6>
               </div>
-              <h3 className="mb-0 gradient-number display-6">0</h3>
-              <small className="text-muted fw-medium">QR Codes gerados</small>
+              <h3 className="mb-0 gradient-number display-6">1</h3>
+              <small className="text-muted fw-medium">Dispositivos conectados</small>
             </div>
           </div>
         </div>
@@ -105,23 +114,23 @@ export default async function Dashboard() {
                   Clientes
                 </h6>
               </div>
-              <h3 className="mb-0 gradient-number display-6">0</h3>
+              <h3 className="mb-0 gradient-number display-6">28</h3>
               <small className="text-muted fw-medium">
-                Clientes cadastrados
+                Clientes únicos
               </small>
             </div>
           </div>
         </div>
       </div>
 
-      {/* Gráficos (placeholders) */}
+      {/* Gráficos e métricas de agendamento */}
       <div className="row g-4">
         <div className="col-12 col-lg-8">
           <div className="card">
             <div className="card-body">
               <div className="d-flex justify-content-between align-items-center mb-4">
                 <h5 className="card-title mb-0 fw-bold">
-                  Vendas nos Últimos Meses
+                  Agendamentos por Período
                 </h5>
                 <select className="select-modern">
                   <option>Últimos 30 dias</option>
@@ -147,7 +156,7 @@ export default async function Dashboard() {
                     <path d="m19 9-5 5-4-4-3 3" />
                   </svg>
                   <p className="text-muted mb-0 fw-medium">
-                    Gráfico de vendas será implementado aqui
+                    Gráfico de agendamentos será implementado aqui
                   </p>
                 </div>
               </div>
@@ -160,7 +169,7 @@ export default async function Dashboard() {
             <div className="card-body">
               <div className="d-flex justify-content-between align-items-center mb-4">
                 <h5 className="card-title mb-0 fw-bold">
-                  Produtos Mais Vendidos
+                  Serviços Mais Agendados
                 </h5>
                 <select className="select-modern">
                   <option>Top 5</option>
@@ -186,11 +195,146 @@ export default async function Dashboard() {
                     <path d="m3 15 4-4 4 4 4-4 4 4" />
                   </svg>
                   <p className="text-muted mb-0 fw-medium">
-                    Gráfico de produtos será implementado aqui
+                    Gráfico de serviços será implementado aqui
                   </p>
                 </div>
               </div>
             </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Métricas adicionais */}
+      <div className="row g-4 mt-2">
+        <div className="col-12 col-lg-4">
+          <div className="card">
+            <div className="card-body">
+              <div className="d-flex align-items-center mb-3">
+                <div className="icon-glass p-3 rounded-4 me-3">
+                  <Clock className="text-primary" size={20} />
+                </div>
+                <h6 className="card-title mb-0 fw-semibold">Taxa de Ocupação</h6>
+              </div>
+              <div className="progress mb-3" style={{ height: "10px" }}>
+                <div
+                  className="progress-bar bg-primary"
+                  role="progressbar"
+                  style={{ width: "65%" }}
+                  aria-valuenow={65}
+                  aria-valuemin={0}
+                  aria-valuemax={100}
+                ></div>
+              </div>
+              <div className="d-flex justify-content-between align-items-center">
+                <span className="small text-muted">Horários ocupados</span>
+                <span className="fw-medium gradient-number">65%</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div className="col-12 col-lg-4">
+          <div className="card">
+            <div className="card-body">
+              <div className="d-flex align-items-center mb-3">
+                <div className="icon-glass p-3 rounded-4 me-3">
+                  <BadgeX className="text-danger" size={20} />
+                </div>
+                <h6 className="card-title mb-0 fw-semibold">Taxa de Cancelamento</h6>
+              </div>
+              <div className="progress mb-3" style={{ height: "10px" }}>
+                <div
+                  className="progress-bar bg-danger"
+                  role="progressbar"
+                  style={{ width: "12%" }}
+                  aria-valuenow={12}
+                  aria-valuemin={0}
+                  aria-valuemax={100}
+                ></div>
+              </div>
+              <div className="d-flex justify-content-between align-items-center">
+                <span className="small text-muted">Agendamentos cancelados</span>
+                <span className="fw-medium text-danger">12%</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div className="col-12 col-lg-4">
+          <div className="card">
+            <div className="card-body">
+              <div className="d-flex align-items-center mb-3">
+                <div className="icon-glass p-3 rounded-4 me-3">
+                  <Repeat className="text-success" size={20} />
+                </div>
+                <h6 className="card-title mb-0 fw-semibold">Taxa de Retorno</h6>
+              </div>
+              <div className="progress mb-3" style={{ height: "10px" }}>
+                <div
+                  className="progress-bar bg-success"
+                  role="progressbar"
+                  style={{ width: "58%" }}
+                  aria-valuenow={58}
+                  aria-valuemin={0}
+                  aria-valuemax={100}
+                ></div>
+              </div>
+              <div className="d-flex justify-content-between align-items-center">
+                <span className="small text-muted">Clientes recorrentes</span>
+                <span className="fw-medium text-success">58%</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Próximos agendamentos */}
+      <div className="card mt-4">
+        <div className="card-body">
+          <h5 className="card-title mb-4 fw-bold">Próximos Agendamentos</h5>
+
+          <div className="table-responsive">
+            <table className="table table-hover">
+              <thead>
+                <tr>
+                  <th>Cliente</th>
+                  <th>Serviço</th>
+                  <th>Data</th>
+                  <th>Hora</th>
+                  <th>Status</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>João Silva</td>
+                  <td>Corte de Cabelo</td>
+                  <td>09/08/2025</td>
+                  <td>10:00</td>
+                  <td><span className="badge bg-primary">Agendado</span></td>
+                </tr>
+                <tr>
+                  <td>Maria Oliveira</td>
+                  <td>Manicure e Pedicure</td>
+                  <td>09/08/2025</td>
+                  <td>14:30</td>
+                  <td><span className="badge bg-success">Confirmado</span></td>
+                </tr>
+                <tr>
+                  <td>Carlos Mendes</td>
+                  <td>Barba</td>
+                  <td>10/08/2025</td>
+                  <td>11:15</td>
+                  <td><span className="badge bg-warning">Pendente</span></td>
+                </tr>
+                <tr>
+                  <td>Ana Sousa</td>
+                  <td>Hidratação</td>
+                  <td>10/08/2025</td>
+                  <td>15:00</td>
+                  <td><span className="badge bg-primary">Agendado</span></td>
+                </tr>
+              </tbody>
+            </table>
           </div>
         </div>
       </div>

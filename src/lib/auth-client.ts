@@ -16,7 +16,17 @@ export const authClient = createAuthClient({
       : process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000",
   // Adiciona timeout e retry para melhorar confiabilidade
   fetchOptions: {
-    timeout: 10000,
-    retries: 2,
+    timeout: 15000, // Aumentando o timeout para 15 segundos
+    retries: 3, // Aumentando para 3 tentativas
+  },
+  // Configuração para salvar cookies corretamente
+  cookieOptions: {
+    path: "/",
+    sameSite: "lax",
+    secure: process.env.NODE_ENV === "production",
+  },
+  // Handler de erro personalizado
+  onError: (error: any) => {
+    console.error("[Auth Client Error]:", error);
   },
 });

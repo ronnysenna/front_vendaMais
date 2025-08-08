@@ -1,20 +1,21 @@
-# VendaMais
+# AgendaAI
 
-Sistema de gestão de vendas e catálogo digital para pequenos e médios negócios.
+Sistema de agendamento online com inteligência artificial para profissionais e empresas.
 
 ## Visão Geral
 
-O VendaMais é uma plataforma web para gerenciar vendas, produtos, clientes e facilitar a criação de catálogos digitais com QR Codes para compartilhamento fácil.
+O AgendaAI é uma plataforma web para gerenciar agendamentos, serviços, horários disponíveis e clientes, com recursos de IA para otimização e recomendações.
 
 ## Tecnologias
 
-- **Frontend**: Next.js, React, Bootstrap
+- **Frontend**: Next.js, React, Bootstrap, Tailwind CSS
 - **Backend**: Node.js com API Routes do Next.js
 - **Banco de Dados**: PostgreSQL
 - **ORM**: Prisma
 - **Autenticação**: Better Auth
 - **Armazenamento de Imagens**: Cloudinary
-- **Outros**: TypeScript, Zod (validação)
+- **Calendário**: React Big Calendar
+- **Outros**: TypeScript, Zod (validação), Shadcn UI
 
 ## Pré-requisitos
 
@@ -26,9 +27,8 @@ O VendaMais é uma plataforma web para gerenciar vendas, produtos, clientes e fa
 
 1. Clone o repositório:
 
-   ```bash
-   git clone https://github.com/seu-usuario/vendamais.git
-   cd vendamais
+   ```bash  git clone https://github.com/seu-usuario/agenda-ai.git
+  cd agenda-ai
    ```
 
 2. Instale as dependências:

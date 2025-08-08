@@ -14,7 +14,7 @@ export async function POST(request: Request) {
     if (!file) {
       return NextResponse.json(
         { message: "Nenhum arquivo de imagem foi enviado." },
-        { status: 400 },
+        { status: 400 }
       );
     }
 
@@ -26,25 +26,25 @@ export async function POST(request: Request) {
     const buffer = Buffer.from(bytes);
 
     // Upload para o Cloudinary
-    // Use a pasta que deseja para as imagens de produto.
-    // Mude 'vendaMais_products' se quiser outra.
+    // Use a pasta que deseja para as imagens de serviços.
+    // Pasta específica para o AgendaAI
     const uploadResult = await new Promise<{ secure_url: string }>(
       (resolve, reject) => {
         cloudinary.uploader
-          .upload_stream({ folder: "vendaMais_products" }, (error, result) => {
+          .upload_stream({ folder: "agendaai_services" }, (error, result) => {
             // Pasta específica para produtos
             if (error || !result) {
               console.error("Erro no Cloudinary:", error);
               return reject(
                 new Error(
-                  `Falha no upload para o Cloudinary: ${error?.message || "Erro desconhecido."}`,
-                ),
+                  `Falha no upload para o Cloudinary: ${error?.message || "Erro desconhecido."}`
+                )
               );
             }
             resolve(result);
           })
           .end(buffer);
-      },
+      }
     );
 
     return NextResponse.json({ url: uploadResult.secure_url }, { status: 200 });
@@ -54,7 +54,7 @@ export async function POST(request: Request) {
       {
         message: `Erro interno do servidor ao fazer upload da imagem. Detalhes: ${error instanceof Error ? error.message : String(error)}`,
       },
-      { status: 500 },
+      { status: 500 }
     );
   }
 }

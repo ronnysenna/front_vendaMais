@@ -557,9 +557,9 @@ export default function QRCodePage() {
               prev.map((inst) =>
                 inst.name === name
                   ? {
-                      ...inst,
-                      status: qrUpdateData.status!.trim().toLowerCase(),
-                    }
+                    ...inst,
+                    status: qrUpdateData.status!.trim().toLowerCase(),
+                  }
                   : inst,
               ),
             );
@@ -1128,7 +1128,7 @@ export default function QRCodePage() {
       <div className="card mb-4">
         <div className="card-body">
           <h1 className="display-6 fw-bold mb-4">
-            Gerenciador de Instâncias WhatsApp
+            Gerenciador de WhatsApp para Agendamentos
           </h1>
 
           {error && ( // Mantido por enquanto, para erros não cobertos por userMessage ou para depuração
@@ -1228,7 +1228,7 @@ export default function QRCodePage() {
                   <span>
                     {allInstances.find((inst) => inst.name === instanceName)
                       ? allInstances.find((inst) => inst.name === instanceName)
-                          ?.status === "conectado"
+                        ?.status === "conectado"
                         ? "Verificar Conexão"
                         : "Conectar / Atualizar QR"
                       : "Criar e Conectar"}
@@ -1341,16 +1341,15 @@ export default function QRCodePage() {
                             e.stopPropagation();
                             handleSelectInstanceFromList(instance);
                           }}
-                          className={`btn btn-sm ${
-                            instance.status === "conectado" ||
-                            instance.status === "open"
+                          className={`btn btn-sm ${instance.status === "conectado" ||
+                              instance.status === "open"
                               ? "btn-outline-success"
                               : instance.status === "close" ||
-                                  instance.status === "error" ||
-                                  instance.status === "unknown"
+                                instance.status === "error" ||
+                                instance.status === "unknown"
                                 ? "btn-outline-primary"
                                 : "btn-outline-secondary"
-                          }`}
+                            }`}
                           disabled={
                             (loadingQr &&
                               currentOperationInstanceName === instance.name) ||
@@ -1361,24 +1360,24 @@ export default function QRCodePage() {
                         </button>
                         {(instance.status === "conectado" ||
                           instance.status === "open") && (
-                          <button
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              handleDisconnect(instance.name);
-                            }}
-                            className="btn btn-sm btn-outline-danger d-flex align-items-center"
-                            disabled={
-                              loadingDisconnectInstanceName === instance.name
-                            }
-                          >
-                            {loadingDisconnectInstanceName === instance.name ? (
-                              <Loader2 className="animate-spin" size={14} />
-                            ) : (
-                              <XCircle size={14} />
-                            )}
-                            <span className="ms-1">Desconectar</span>
-                          </button>
-                        )}
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handleDisconnect(instance.name);
+                              }}
+                              className="btn btn-sm btn-outline-danger d-flex align-items-center"
+                              disabled={
+                                loadingDisconnectInstanceName === instance.name
+                              }
+                            >
+                              {loadingDisconnectInstanceName === instance.name ? (
+                                <Loader2 className="animate-spin" size={14} />
+                              ) : (
+                                <XCircle size={14} />
+                              )}
+                              <span className="ms-1">Desconectar</span>
+                            </button>
+                          )}
                       </div>
                     </div>
                   );

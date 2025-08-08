@@ -18,7 +18,7 @@ export async function sendEmail({ to, subject, text, html }: EmailOptions) {
 
   if (!user || !pass) {
     console.error(
-      "Credenciais de email não configuradas. Verifique as variáveis de ambiente EMAIL_USER e EMAIL_PASS.",
+      "Credenciais de email não configuradas. Verifique as variáveis de ambiente EMAIL_USER e EMAIL_PASS."
     );
     throw new Error("Configuração de email incompleta");
   }
@@ -37,7 +37,7 @@ export async function sendEmail({ to, subject, text, html }: EmailOptions) {
   try {
     // Envie o email com o transportador definido
     const info = await transporter.sendMail({
-      from: `"VendaMais" <${user}>`, // endereço do remetente
+      from: `"AgendaAI" <${user}>`, // endereço do remetente
       to: to,
       subject: subject,
       text: text || "",

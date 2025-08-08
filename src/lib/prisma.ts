@@ -20,18 +20,19 @@ export const prisma = globalThis.prisma ?? prismaClientSingleton();
 if (process.env.NODE_ENV !== "production") globalThis.prisma = prisma;
 
 // Tratamento de erros de conexão
-if (process.env.NODE_ENV !== "production") {
-  process.on("beforeExit", async () => {
-    await prisma.$disconnect();
-  });
-
-  process.on("SIGINT", async () => {
-    await prisma.$disconnect();
-    process.exit(0);
-  });
-
-  process.on("SIGTERM", async () => {
+// Não use process.on em ambientes Edge
+if (
+  process.env.NODE_ENV !== "production" &&
+  typeof process !== "undefined" &&
+  typeof process.on === "function"
+) {
+  // Verificamos se estamos em um ambiente Node.js completo antes de registrar listeners
+  const handleShutdown = async () => {
     await prisma.$disconnect();
     process.exit(0);
-  });
+  };
+
+  // Usa once em vez de on para evitar múltiplos registros
+  process.once("SIGTERM", handleShutdown);
+  process.once("SIGINT", handleShutdown);
 }

@@ -50,14 +50,45 @@ export function LoginForm() {
   async function onSubmit(formData: LoginFormValues) {
     setIsLoading(true);
     try {
+      console.log("Iniciando login com:", formData.email);
+
+      // Tentar obter a URL de retorno dos parâmetros de busca ou usar dashboard como padrão
+      const callbackParam = searchParams.get("callbackUrl");
+      const callbackURL = callbackParam ? decodeURIComponent(callbackParam) : "/dashboard";
+      console.log("URL de callback:", callbackURL);
+
       const result = await authClient.signIn.email(
         {
           email: formData.email,
           password: formData.password,
-          callbackURL: "/dashboard",
+          callbackURL: callbackURL,
         },
         {
-          onSuccess: () => router.replace("/dashboard"),
+          onSuccess: () => {
+            console.log("Login bem-sucedido, redirecionando para:", callbackURL);
+
+            // Forçar uma revalidação do cookie antes de redirecionar
+            document.cookie = "login_success=true; path=/;";
+
+            // Mensagem para o usuário
+            setStatusMessage({
+              type: "success",
+              message: "Login bem-sucedido! Redirecionando..."
+            });
+
+            // Adicionamos um pequeno atraso para garantir que os cookies sejam definidos
+            setTimeout(() => {
+              try {
+                // Usar window.location para um redirecionamento completo
+                console.log("Redirecionando para:", callbackURL);
+                window.location.replace(callbackURL);
+              } catch (err) {
+                console.error("Erro no redirecionamento:", err);
+                // Fallback para caso de erro
+                window.location.href = "/dashboard";
+              }
+            }, 1500);
+          },
           onError: (ctx) => {
             console.error("Erro ao logar", ctx);
             setStatusMessage({
@@ -68,21 +99,54 @@ export function LoginForm() {
           },
         },
       );
+
+      console.log("Resultado do login:", result);
     } finally {
       setIsLoading(false);
     }
-  }
-
-  async function handleSignInGoogle() {
+  } async function handleSignInGoogle() {
     try {
+      // Tentar obter a URL de retorno dos parâmetros de busca ou usar dashboard como padrão
+      const callbackParam = searchParams.get("callbackUrl");
+      const callbackURL = callbackParam ? decodeURIComponent(callbackParam) : "/dashboard";
+
+      setIsLoading(true);
       await authClient.signIn.social(
         {
           provider: "google",
-          callbackURL: "/dashboard",
+          callbackURL: callbackURL,
         },
         {
-          onSuccess: () => router.replace("/dashboard"),
-          onError: (ctx) => console.error("Erro ao logar", ctx),
+          onSuccess: () => {
+            console.log("Login com Google bem-sucedido, redirecionando para:", callbackURL);
+            // Forçar uma revalidação do cookie antes de redirecionar
+            document.cookie = "login_success=true; path=/;";
+
+            // Mensagem para o usuário
+            setStatusMessage({
+              type: "success",
+              message: "Login com Google bem-sucedido! Redirecionando..."
+            });
+
+            // Usar window.location para um redirecionamento completo
+            setTimeout(() => {
+              try {
+                window.location.replace(callbackURL);
+              } catch (err) {
+                console.error("Erro no redirecionamento:", err);
+                // Fallback para caso de erro
+                window.location.href = "/dashboard";
+              }
+            }, 1500);
+          },
+          onError: (ctx) => {
+            console.error("Erro ao logar com Google", ctx);
+            setStatusMessage({
+              type: "error",
+              message: "Falha ao fazer login com Google. Tente novamente."
+            });
+            setIsLoading(false);
+          },
         },
       );
     } catch (error) {

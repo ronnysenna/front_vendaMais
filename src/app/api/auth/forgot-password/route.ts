@@ -10,7 +10,7 @@ export async function POST(request: NextRequest) {
     if (!email) {
       return NextResponse.json(
         { error: "E-mail é obrigatório" },
-        { status: 400 },
+        { status: 400 }
       );
     }
 
@@ -22,6 +22,9 @@ export async function POST(request: NextRequest) {
     // Por segurança, sempre retornar uma resposta positiva
     // mesmo se o usuário não existir (para evitar enumeration attacks)
     if (!user) {
+      console.log(
+        `Tentativa de recuperação para email não encontrado: ${email}`
+      );
       // Note que retornamos 200 mesmo se o usuário não existir
       // para não revelar quais e-mails estão cadastrados
       return NextResponse.json(
@@ -29,12 +32,37 @@ export async function POST(request: NextRequest) {
           message:
             "Se o e-mail estiver cadastrado, enviaremos um link de recuperação.",
         },
-        { status: 200 },
+        { status: 200 }
       );
     }
 
-    // Gerar um token de redefinição de senha
-    const resetToken = crypto.randomBytes(32).toString("hex");
+    // Gerar um token de redefinição de senha seguro e consistente
+    let resetToken = "";
+    try {
+      // Gerar token em bytes
+      const tokenBuffer = crypto.randomBytes(32);
+      // Converter para hex string (mais fácil de usar em URLs)
+      resetToken = tokenBuffer.toString("hex");
+    } catch (tokenError) {
+      console.error("Erro ao gerar token aleatório:", tokenError);
+      // Em caso de erro, usar um método alternativo de geração de token
+      resetToken = crypto
+        .createHash("sha256")
+        .update(email + Date.now().toString())
+        .digest("hex");
+    }
+
+    // Garantir que o token não seja vazio
+    if (!resetToken) {
+      throw new Error("Falha ao gerar token de recuperação");
+    }
+
+    console.log(`Gerando token de recuperação para ${user.email}`);
+    console.log(
+      `Token original gerado (primeiros 8 chars): ${resetToken.substring(0, 8)}...`
+    );
+
+    // Hash do token para armazenamento seguro no banco de dados
     const resetTokenHashed = crypto
       .createHash("sha256")
       .update(resetToken)
@@ -57,12 +85,12 @@ export async function POST(request: NextRequest) {
     try {
       await sendEmail({
         to: user.email,
-        subject: "VendaMais - Recuperação de Senha",
+        subject: "AgendaAI - Recuperação de Senha",
         html: `
           <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
             <h2 style="color: #fb964c;">Recuperação de Senha</h2>
-            <p>Olá ${user.name},</p>
-            <p>Recebemos uma solicitação para redefinir sua senha no VendaMais.</p>
+            <p>Olá ${user.name || "Usuário"},</p>
+            <p>Recebemos uma solicitação para redefinir sua senha no AgendaAI.</p>
             <p>Clique no botão abaixo para criar uma nova senha. Este link é válido por 1 hora.</p>
             <div style="text-align: center; margin: 30px 0;">
               <a href="${resetUrl}" style="background-color: #fb964c; color: white; padding: 12px 24px; text-decoration: none; border-radius: 4px; font-weight: bold;">
@@ -70,7 +98,7 @@ export async function POST(request: NextRequest) {
               </a>
             </div>
             <p>Se você não solicitou a redefinição de senha, pode ignorar este e-mail.</p>
-            <p>Atenciosamente,<br>Equipe VendaMais</p>
+            <p>Atenciosamente,<br>Equipe AgendaAI</p>
           </div>
         `,
       });
@@ -86,13 +114,13 @@ export async function POST(request: NextRequest) {
         message:
           "Se o e-mail estiver cadastrado, enviaremos um link de recuperação.",
       },
-      { status: 200 },
+      { status: 200 }
     );
   } catch (error) {
     console.error("Erro ao processar recuperação de senha:", error);
     return NextResponse.json(
       { error: "Erro interno ao processar solicitação" },
-      { status: 500 },
+      { status: 500 }
     );
   }
 }

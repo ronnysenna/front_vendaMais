@@ -17,7 +17,7 @@ if [ -f ".env" ]; then
 fi
 
 echo "========================================"
-echo "  INICIANDO SERVIÇO VENDAMAIS - DOCKER"
+echo "  INICIANDO SERVIÇO AGENDA AI - DOCKER"
 echo "========================================"
 echo "Porta: $PORT"
 echo "NODE_ENV: $NODE_ENV"
